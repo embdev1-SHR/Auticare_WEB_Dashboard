@@ -2,6 +2,9 @@
 const nextConfig = {
   reactStrictMode: false, // iff true then components renders twices
   swcMinify: true,
+  experimental: {
+    esmExternals: false,
+  },
   i18n: {
     locales: ["en"],
     defaultLocale: process.env.NEXT_PUBLIC_APP_LANG || "en",
