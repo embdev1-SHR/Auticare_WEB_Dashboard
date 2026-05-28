@@ -63,6 +63,16 @@ function BillingDetails() {
   }, [AllPlans, client]);
 
   useEffect(() => {
+    if (client[0]?.SubscriptionPlanActivatedDate) {
+      setFieldValue("SubscriptionPlanActivatedDate", new Date(client[0].SubscriptionPlanActivatedDate).toISOString().split("T")[0]);
+    }
+    if (client[0]?.SubcriptionPlanEndDate) {
+      setFieldValue("SubcriptionPlanEndDate", new Date(client[0].SubcriptionPlanEndDate).toISOString().split("T")[0]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [client]);
+
+  useEffect(() => {
     if (StateList.length > 0) {
       const DefaultState = StateList?.find((option) => option.label === client[0]?.BillingState);
       setSelectedBillState(DefaultState !== undefined ? DefaultState : "");
@@ -294,6 +304,38 @@ function BillingDetails() {
               </div>
             </Col>
           </Row>
+          <Row>
+            <Col md="6">
+              <div className="mb-4">
+                <Label className="form-label">Activation Date</Label>
+                <Field type="date" className="form-control" name="SubscriptionPlanActivatedDate" />
+              </div>
+            </Col>
+            <Col md="6">
+              <div className="mb-4">
+                <Label className="form-label">End Date</Label>
+                <Field type="date" className="form-control" name="SubcriptionPlanEndDate" />
+              </div>
+            </Col>
+          </Row>
+          <Row>
+            <Col md="12">
+              <button
+                type="button"
+                className="btn btn-soft-success btn-sm mb-3"
+                onClick={() => {
+                  const today = new Date();
+                  const nextMonth = new Date(today);
+                  nextMonth.setMonth(nextMonth.getMonth() + 1);
+                  setFieldValue("SubscriptionPlanActivatedDate", today.toISOString().split("T")[0]);
+                  setFieldValue("SubcriptionPlanEndDate", nextMonth.toISOString().split("T")[0]);
+                  setFieldValue("SubscriptionPlanStatus", "Payment Success");
+                }}
+              >
+                Activate for 1 Month
+              </button>
+            </Col>
+          </Row>
         </>
       }
       {IsEdit ? false : true &&
@@ -338,6 +380,20 @@ function BillingDetails() {
             </div>
           </Col>
         </Row>
+        <Row>
+          <Col md="6">
+            <div className="mb-4">
+              <Label className="form-label">Activation Date</Label>
+              <Field type="date" className="form-control" name="SubscriptionPlanActivatedDate" />
+            </div>
+          </Col>
+          <Col md="6">
+            <div className="mb-4">
+              <Label className="form-label">End Date</Label>
+              <Field type="date" className="form-control" name="SubcriptionPlanEndDate" />
+            </div>
+          </Col>
+        </Row>
       }
       <Row>
         <Col lg="6">
@@ -345,13 +401,14 @@ function BillingDetails() {
             <Label className="form-label required" htmlFor="SubscriptionPlanStatus">
               Payment Status
             </Label>
-            <Field
-              type="text"
-              className="form-control"
-              id="SubscriptionPlanStatus"
-              name="SubscriptionPlanStatus"
-              placeholder="Enter subscription plan payment status"
-            />
+            <Field as="select" className="form-select" id="SubscriptionPlanStatus" name="SubscriptionPlanStatus">
+              <option value="">Select status</option>
+              <option value="Payment Success">Payment Success</option>
+              <option value="Pending">Pending</option>
+              <option value="Failed">Failed</option>
+              <option value="Expired">Expired</option>
+              <option value="Suspend">Suspend</option>
+            </Field>
             {errors.SubscriptionPlanStatus && touched.SubscriptionPlanStatus ? (
               <ErrorMessage className="text-danger small" name="SubscriptionPlanStatus" component="div" />
             ) : null}
