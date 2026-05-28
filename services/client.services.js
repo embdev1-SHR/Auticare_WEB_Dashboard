@@ -31,6 +31,11 @@ export const searchClient = async (data) => {
   return result;
 };
 
+export const activateSubscription = async (ClientID) => {
+  const result = await Axios.post(`/api/v1/clients/${ClientID}/activate-subscription`);
+  return result;
+};
+
 // data
 export const ClientTypeList = [
   { value: "Autism Schools", label: "Autism Schools" },

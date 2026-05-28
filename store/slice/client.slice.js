@@ -2,7 +2,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { HYDRATE } from "next-redux-wrapper";
 import Router from "next/router";
 import { ToastNotification } from "../../components/shared/toast";
-import { createClient, deleteClient, fetchAllClients, fetchClientDetails, searchClient, updateClient } from "../../services/client.services";
+import { activateSubscription, createClient, deleteClient, fetchAllClients, fetchClientDetails, searchClient, updateClient } from "../../services/client.services";
 import { setModalOpen } from "./layout.slice";
 
 const initialState = {
@@ -87,18 +87,8 @@ export const clientUpdation = createAsyncThunk("client/clientUpdation", async (v
 
 export const activateClientSubscription = createAsyncThunk("client/activateClientSubscription", async (values, thunkApi) => {
   try {
-    const today = new Date();
-    const nextMonth = new Date(today);
-    nextMonth.setMonth(nextMonth.getMonth() + 1);
-    const payload = {
-      ...values,
-      SubscriptionPlanActivatedDate: today.toISOString().split("T")[0],
-      SubcriptionPlanEndDate: nextMonth.toISOString().split("T")[0],
-      SubscriptionPlanStatus: "Payment Success",
-      Status: true,
-    };
-    const { data } = await updateClient(values.ClientID, payload);
-    ToastNotification("success", "Subscription activated successfully");
+    const { data } = await activateSubscription(values.ClientID);
+    ToastNotification("success", data.results.message);
     thunkApi.dispatch(getClient(values.ClientID));
     return data;
   } catch (error) {
