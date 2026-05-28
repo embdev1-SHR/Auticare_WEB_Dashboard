@@ -339,61 +339,63 @@ function BillingDetails() {
         </>
       }
       {IsEdit ? false : true &&
-        <Row>
-          <Col md="4">
-            <div className="mb-4">
-              <Label className="form-label">Bank</Label>
-              <Field type="text" className="form-control" placeholder="Enter bank" name="Bank" />
-              {errors.Bank && touched.Bank ? <ErrorMessage className="text-danger small" name="Bank" component="div" /> : null}
-            </div>
-          </Col>
-          <Col md="4">
-            <div className="mb-4">
-              <Label className="form-label">Bank Branch</Label>
-              <Field type="text" className="form-control" placeholder="Enter branch" name="Branch" />
-              {errors.Branch && touched.Branch ? <ErrorMessage className="text-danger small" name="Branch" component="div" /> : null}
-            </div>
-          </Col>
-          <Col md="4">
-            <div className="mb-4">
-              <Label className="form-label required">Subscription Plan</Label>
-              <Field
-                component={Select}
-                options={SubscriptionList}
-                id="SubscriptionPlanId"
-                name="SubscriptionPlanId"
-                placeholder="Select"
-                isSearchable={true}
-                isDisabled={IsEdit === null ? true : false}
-                value={selectedSubscription}
-                onChange={(plan) => {
-                  setFieldValue("SubscriptionPlanId", plan.value);
-                  setSelectedSubscription(plan);
-                }}
-                styles={{
-                  control: (styles) => ({ ...styles, borderColor: " #e8eaed;", borderRadius: "0.375rem" }),
-                }}
-              />
-              {errors.SubscriptionPlanId && touched.SubscriptionPlanId ? (
-                <ErrorMessage className="text-danger small" name="SubscriptionPlanId" component="div" />
-              ) : null}
-            </div>
-          </Col>
-        </Row>
-        <Row>
-          <Col md="6">
-            <div className="mb-4">
-              <Label className="form-label">Activation Date</Label>
-              <Field type="date" className="form-control" name="SubscriptionPlanActivatedDate" />
-            </div>
-          </Col>
-          <Col md="6">
-            <div className="mb-4">
-              <Label className="form-label">End Date</Label>
-              <Field type="date" className="form-control" name="SubcriptionPlanEndDate" />
-            </div>
-          </Col>
-        </Row>
+        <>
+          <Row>
+            <Col md="4">
+              <div className="mb-4">
+                <Label className="form-label">Bank</Label>
+                <Field type="text" className="form-control" placeholder="Enter bank" name="Bank" />
+                {errors.Bank && touched.Bank ? <ErrorMessage className="text-danger small" name="Bank" component="div" /> : null}
+              </div>
+            </Col>
+            <Col md="4">
+              <div className="mb-4">
+                <Label className="form-label">Bank Branch</Label>
+                <Field type="text" className="form-control" placeholder="Enter branch" name="Branch" />
+                {errors.Branch && touched.Branch ? <ErrorMessage className="text-danger small" name="Branch" component="div" /> : null}
+              </div>
+            </Col>
+            <Col md="4">
+              <div className="mb-4">
+                <Label className="form-label required">Subscription Plan</Label>
+                <Field
+                  component={Select}
+                  options={SubscriptionList}
+                  id="SubscriptionPlanId"
+                  name="SubscriptionPlanId"
+                  placeholder="Select"
+                  isSearchable={true}
+                  isDisabled={IsEdit === null ? true : false}
+                  value={selectedSubscription}
+                  onChange={(plan) => {
+                    setFieldValue("SubscriptionPlanId", plan.value);
+                    setSelectedSubscription(plan);
+                  }}
+                  styles={{
+                    control: (styles) => ({ ...styles, borderColor: " #e8eaed;", borderRadius: "0.375rem" }),
+                  }}
+                />
+                {errors.SubscriptionPlanId && touched.SubscriptionPlanId ? (
+                  <ErrorMessage className="text-danger small" name="SubscriptionPlanId" component="div" />
+                ) : null}
+              </div>
+            </Col>
+          </Row>
+          <Row>
+            <Col md="6">
+              <div className="mb-4">
+                <Label className="form-label">Activation Date</Label>
+                <Field type="date" className="form-control" name="SubscriptionPlanActivatedDate" />
+              </div>
+            </Col>
+            <Col md="6">
+              <div className="mb-4">
+                <Label className="form-label">End Date</Label>
+                <Field type="date" className="form-control" name="SubcriptionPlanEndDate" />
+              </div>
+            </Col>
+          </Row>
+        </>
       }
       <Row>
         <Col lg="6">
