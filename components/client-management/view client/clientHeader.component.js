@@ -1,7 +1,7 @@
 
 import { useDispatch, useSelector } from "react-redux";
 import { Button, Label } from "reactstrap";
-import { clientDeletion, selectClient, selectIsLoading } from "../../../store/slice/client.slice";
+import { activateClientSubscription, clientDeletion, selectClient, selectIsLoading } from "../../../store/slice/client.slice";
 import Breadcrumb from "../../shared/breadcrumb";
 
 function ClientHeader() {
@@ -76,7 +76,16 @@ function ClientHeader() {
           </div>
         </div>
       </div>
-      <div className='card_action justify-content-end'>
+      <div className='card_action justify-content-end' style={{ gap: "8px", display: "flex" }}>
+        <Button
+          type='button'
+          disabled={loading}
+          color='success'
+          className='btn waves-effect waves-light'
+          onClick={() => dispatch(activateClientSubscription(client[0]))}
+        >
+          Activate (1 Month)
+        </Button>
         {client[0].Status == 1 ? <Button type='button' disabled={loading} className='btn btn-danger waves-effect waves-light' onClick={HandleSuspend}>
           Suspend
         </Button> : <Button type='button' disabled={loading}  color='success'  className='btn  waves-effect waves-light' onClick={HandleEnable}>

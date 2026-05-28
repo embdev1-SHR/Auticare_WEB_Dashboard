@@ -85,6 +85,29 @@ export const clientUpdation = createAsyncThunk("client/clientUpdation", async (v
   }
 });
 
+export const activateClientSubscription = createAsyncThunk("client/activateClientSubscription", async (values, thunkApi) => {
+  try {
+    const today = new Date();
+    const nextMonth = new Date(today);
+    nextMonth.setMonth(nextMonth.getMonth() + 1);
+    const payload = {
+      ...values,
+      SubscriptionPlanActivatedDate: today.toISOString().split("T")[0],
+      SubcriptionPlanEndDate: nextMonth.toISOString().split("T")[0],
+      SubscriptionPlanStatus: "Payment Success",
+      Status: true,
+    };
+    const { data } = await updateClient(values.ClientID, payload);
+    ToastNotification("success", "Subscription activated successfully");
+    thunkApi.dispatch(getClient(values.ClientID));
+    return data;
+  } catch (error) {
+    const message = error?.response?.data?.errors?.message || "Activation failed";
+    ToastNotification("error", message);
+    return thunkApi.rejectWithValue(message);
+  }
+});
+
 export const clientDeletion = createAsyncThunk("client/clientDeletion", async (ClientID, thunkApi) => {
   console.log("slice query0", ClientID.clientId + `?${ClientID.client}`);
   try {
@@ -189,6 +212,15 @@ export const clientSlice = createSlice({
         state.isLoading = false;
       })
       .addCase(clientUpdation.rejected, (state, action) => {
+        state.isLoading = false;
+      })
+      .addCase(activateClientSubscription.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(activateClientSubscription.fulfilled, (state) => {
+        state.isLoading = false;
+      })
+      .addCase(activateClientSubscription.rejected, (state) => {
         state.isLoading = false;
       })
       .addCase(clientDeletion.pending, (state) => {
