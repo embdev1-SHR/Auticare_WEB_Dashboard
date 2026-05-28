@@ -30,7 +30,7 @@ export const getAllTherapists = createAsyncThunk("therapist/getAllTherapists", a
     return results.data;
   } catch (error) {
     const message = error.response.data.errors.message;
-    return thunkApi.rejectWithMessage(message);
+    return thunkApi.rejectWithValue(message);
   }
 });
 export const therapistCreation = createAsyncThunk("therapist/therapistCreation", async (values, thunkApi) => {
@@ -65,7 +65,7 @@ export const getTherapist = createAsyncThunk("therapist/getTherapist", async (Th
   } catch (error) {
     console.log(error);
     const message = error.response.data.errors.message;
-    return thunkApi.rejectWithMessage(message);
+    return thunkApi.rejectWithValue(message);
   }
 });
 
@@ -88,7 +88,7 @@ export const therapistUpdation = createAsyncThunk("therapist/therapistUpdation",
       const message = err.message;
       ToastNotification("error", "Therapist updation failed", message);
     }
-    return thunkApi.rejectWithMessage(message);
+    return thunkApi.rejectWithValue(message);
   }
 });
 
@@ -103,7 +103,7 @@ export const therapistDeletion = createAsyncThunk("therapist/therapistDeletion",
     console.log(error);
     const message = error.response.data.errors.message;
     ToastNotification("error", "Failed to delete", message);
-    return thunkApi.rejectWithMessage(message);
+    return thunkApi.rejectWithValue(message);
   }
 });
 
@@ -114,7 +114,7 @@ export const therapistSearch = createAsyncThunk("therapist/therapistSearch", asy
   } catch (error) {
     const message = error.responce.data.message;
     ToastNotification("error", message);
-    return thunkApi.rejectWithMessage(message);
+    return thunkApi.rejectWithValue(message);
   }
 });
 

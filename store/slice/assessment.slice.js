@@ -16,7 +16,7 @@ export const fetchAllAssessments = createAsyncThunk(
       } catch (error) {
         const message = error.responce.data.message;
         console.log(message);
-        return thunkApi.rejectWithMessage(message);
+        return thunkApi.rejectWithValue(message);
       }
     }
   );

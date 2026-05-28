@@ -9,7 +9,7 @@ export const fetchAllAppointments = createAsyncThunk("appointment/fetchAllAppoin
     return data.results.data;
   } catch (error) {
     const message = error.responce.data.message;
-    return thunkApi.rejectWithMessage(message);
+    return thunkApi.rejectWithValue(message);
   }
 });
 
@@ -30,7 +30,7 @@ export const updateAppointment = createAsyncThunk("appointment/updateAppointment
       const message = err.message;
       ToastNotification("error", message);
     }
-    return thunkApi.rejectWithMessage(message);
+    return thunkApi.rejectWithValue(message);
   }
 });
 

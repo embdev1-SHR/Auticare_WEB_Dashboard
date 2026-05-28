@@ -62,7 +62,7 @@ export const fetchAllContents = createAsyncThunk("content/fetchAllContents", asy
     return data.results.data;
   } catch (error) {
     const message = error.responce.data.message;
-    return thunkApi.rejectWithMessage(message);
+    return thunkApi.rejectWithValue(message);
   }
 });
 export const createContent = createAsyncThunk("content/createContent", async (data, thunkApi) => {
@@ -138,7 +138,7 @@ export const searchContent = createAsyncThunk("content/searchContent", async (Co
     return res.data.results.data;
   } catch (error) {
     const message = error.responce.data.message;
-    return thunkApi.rejectWithMessage(message);
+    return thunkApi.rejectWithValue(message);
   }
 });
 

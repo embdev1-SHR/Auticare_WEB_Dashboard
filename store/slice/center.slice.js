@@ -22,7 +22,7 @@ export const fetchAllCenters = createAsyncThunk(
       return results;
     } catch (error) {
       const message = error.responce.data.message;
-      return thunkApi.rejectWithMessage(message);
+      return thunkApi.rejectWithValue(message);
     }
   }
 );
@@ -101,7 +101,7 @@ export const searchCenter = createAsyncThunk(
       return res.data.results.data;
     } catch (error) {
       const message = error.responce.data.message;
-      return thunkApi.rejectWithMessage(message);
+      return thunkApi.rejectWithValue(message);
     }
   }
 );

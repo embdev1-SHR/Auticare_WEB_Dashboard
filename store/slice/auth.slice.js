@@ -115,7 +115,7 @@ export const signOut = createAsyncThunk("auth/signOut", async (args, thunkAPI) =
   } catch (error) {
     console.log(error);
     const message = error.response.data.errors.message;
-    return thunkAPI.rejectWithMessage(message);
+    return thunkAPI.rejectWithValue(message);
   }
 });
 
@@ -143,7 +143,7 @@ export const getUserData = createAsyncThunk("auth/getUserData", async (args, thu
   } catch (error) {
     console.log(error);
     const message = error.response.data.errors.message;
-    return thunkAPI.rejectWithMessage(message);
+    return thunkAPI.rejectWithValue(message);
   }
 });
 
@@ -157,7 +157,7 @@ export const forgotPassword = createAsyncThunk("auth/forgotPassword", async (arg
     console.log(error);
     const message = error.response.data.errors.message;
     ToastNotification("error", message, null);
-    return thunkAPI.rejectWithMessage(message);
+    return thunkAPI.rejectWithValue(message);
   }
 });
 
@@ -170,7 +170,7 @@ export const confirmOTP = createAsyncThunk("auth/confirmOTP", async (args, thunk
     console.log(error);
     const message = error.response.data.errors.message;
     ToastNotification("error", message, null);
-    return thunkAPI.rejectWithMessage(message);
+    return thunkAPI.rejectWithValue(message);
   }
 });
 
@@ -195,7 +195,7 @@ export const resetPassword = createAsyncThunk("auth/resetPassword", async (args,
       const message = err.message;
       ToastNotification("error", message);
     }
-    return thunkAPI.rejectWithMessage(message);
+    return thunkAPI.rejectWithValue(message);
   }
 });
 

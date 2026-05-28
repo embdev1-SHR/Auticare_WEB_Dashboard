@@ -26,7 +26,7 @@ export const getAllClients = createAsyncThunk("client/getAllClients", async (arg
     console.log(error);
     // const message = error.response.data.message;
     const message = error.response.data.errors.message;
-    return thunkApi.rejectWithMessage(message);
+    return thunkApi.rejectWithValue(message);
   }
 });
 
@@ -47,7 +47,7 @@ export const clientCreation = createAsyncThunk("client/clientCreation", async (v
         ToastNotification("error", "Failed", e.param + " " + e.msg);
       });
     }
-    return thunkApi.rejectWithMessage(message);
+    return thunkApi.rejectWithValue(message);
   }
 });
 
@@ -59,7 +59,7 @@ export const getClient = createAsyncThunk("client/getClient", async (ClientID, t
   } catch (error) {
     console.log(error);
     const message = error.response.data.errors.message;
-    return thunkApi.rejectWithMessage(message);
+    return thunkApi.rejectWithValue(message);
   }
 });
 
@@ -81,7 +81,7 @@ export const clientUpdation = createAsyncThunk("client/clientUpdation", async (v
       const message = err.message;
       ToastNotification("error", message);
     }
-    return thunkApi.rejectWithMessage(message);
+    return thunkApi.rejectWithValue(message);
   }
 });
 
@@ -99,7 +99,7 @@ export const clientDeletion = createAsyncThunk("client/clientDeletion", async (C
     console.log(error);
     const message = error.response.data.errors.message;
     ToastNotification("error", message);
-    return thunkApi.rejectWithMessage(message);
+    return thunkApi.rejectWithValue(message);
   }
 });
 
@@ -110,7 +110,7 @@ export const clientSearch = createAsyncThunk("client/clientSearch", async (searc
   } catch (error) {
     const message = error.responce.data.message;
     ToastNotification("error", message);
-    return thunkApi.rejectWithMessage(message);
+    return thunkApi.rejectWithValue(message);
   }
 });
 

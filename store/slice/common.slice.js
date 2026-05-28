@@ -23,7 +23,7 @@ export const getAllCountries = createAsyncThunk("common/getAllCountries", async 
   } catch (error) {
     console.log(error);
     const message = error.response.data.errors.message;
-    return thunkApi.rejectWithMessage(message);
+    return thunkApi.rejectWithValue(message);
   }
 });
 
@@ -35,7 +35,7 @@ export const getAllRegion = createAsyncThunk("common/getAllRegion", async (thunk
   } catch (error) {
     console.log(error);
     const message = error.response.data.errors.message;
-    return thunkApi.rejectWithMessage(message);
+    return thunkApi.rejectWithValue(message);
   }
 });
 export const getAllStates = createAsyncThunk("common/getAllStates", async (CountryID, thunkApi) => {
@@ -46,7 +46,7 @@ export const getAllStates = createAsyncThunk("common/getAllStates", async (Count
   } catch (error) {
     console.log(error);
     const message = error.response.data.errors.message;
-    return thunkApi.rejectWithMessage(message);
+    return thunkApi.rejectWithValue(message);
   }
 });
 
@@ -60,7 +60,7 @@ export const uploadImage = createAsyncThunk("common/uploadImage", async (imageFi
     console.log(error);
     const message = error.errors.message.message;
     ToastNotification("error", "Image upload failed!", message);
-    return thunkApi.rejectWithMessage(message);
+    return thunkApi.rejectWithValue(message);
   }
 });
 
@@ -72,7 +72,7 @@ export const getDashboard = createAsyncThunk("common/getDashboard", async (args,
   } catch (error) {
     console.log(error);
     const message = error.response.data.errors.message;
-    return thunkApi.rejectWithMessage(message);
+    return thunkApi.rejectWithValue(message);
   }
 });
 

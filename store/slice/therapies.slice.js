@@ -24,7 +24,7 @@ export const getAllTherapiesSkillGoal = createAsyncThunk("therapy/getAllTherapie
   } catch (error) {
     const message = error.response.data.errors.message;
     ToastNotification("error", message);
-    return thunkApi.rejectWithMessage(message);
+    return thunkApi.rejectWithValue(message);
   }
 });
 
@@ -36,7 +36,7 @@ export const getAllTherapies = createAsyncThunk("therapy/getAllTherapies", async
   } catch (error) {
     const message = error.response.data.errors.message;
     ToastNotification("error", message);
-    return thunkApi.rejectWithMessage(message);
+    return thunkApi.rejectWithValue(message);
   }
 });
 
@@ -61,7 +61,7 @@ export const therapyCreation = createAsyncThunk("therapy/therapyCreation", async
       ToastNotification("error", "Therapy creation Failed", message);
     }
 
-    return thunkApi.rejectWithMessage(message);
+    return thunkApi.rejectWithValue(message);
   }
 });
 export const getATherapy = createAsyncThunk("therapy/getATherapy", async (TherapyID, thunkApi) => {
@@ -72,7 +72,7 @@ export const getATherapy = createAsyncThunk("therapy/getATherapy", async (Therap
   } catch (error) {
     const message = error.response.data.errors.message;
     ToastNotification("error", message);
-    return thunkApi.rejectWithMessage(message);
+    return thunkApi.rejectWithValue(message);
   }
 });
 
@@ -96,7 +96,7 @@ export const therapyUpdation = createAsyncThunk("therapy/therapyUpdation", async
       const message = err.message;
       ToastNotification("error", "Therapy updation failed", message);
     }
-    return thunkApi.rejectWithMessage(message);
+    return thunkApi.rejectWithValue(message);
   }
 });
 
@@ -110,7 +110,7 @@ export const therapyDeletion = createAsyncThunk("therapy/therapyDeletion", async
   } catch (error) {
     const message = error.response.data.errors.message;
     ToastNotification("error", message);
-    return thunkApi.rejectWithMessage(message);
+    return thunkApi.rejectWithValue(message);
   }
 });
 
@@ -122,7 +122,7 @@ export const therapySearch = createAsyncThunk("center/therapySearch", async (sea
   } catch (error) {
     console.log(error);
     const message = error.responce.data.message;
-    return thunkApi.rejectWithMessage(message);
+    return thunkApi.rejectWithValue(message);
   }
 });
 

@@ -23,7 +23,7 @@ export const getAllDepartments = createAsyncThunk("department/getAllDepartments"
     return results.data;
   } catch (error) {
     const message = error.response.data.errors.message;
-    return thunkApi.rejectWithMessage(message);
+    return thunkApi.rejectWithValue(message);
   }
 });
 
@@ -45,7 +45,7 @@ export const departmentCreation = createAsyncThunk("department/departmentCreatio
       const message = err.message;
       ToastNotification("error", message);
     }
-    return thunkApi.rejectWithMessage(message);
+    return thunkApi.rejectWithValue(message);
   }
 });
 
@@ -61,7 +61,7 @@ export const departmentDeletion = createAsyncThunk("department/departmentDeletio
     console.log(error);
     const message = error.response.data.errors.message;
     ToastNotification("error", message);
-    return thunkApi.rejectWithMessage(message);
+    return thunkApi.rejectWithValue(message);
   }
 });
 
@@ -73,7 +73,7 @@ export const getDepartment = createAsyncThunk("department/getDepartment", async 
   } catch (error) {
     console.log(error);
     const message = error.response.data.errors.message;
-    return thunkApi.rejectWithMessage(message);
+    return thunkApi.rejectWithValue(message);
   }
 });
 
@@ -96,7 +96,7 @@ export const departmentUpdation = createAsyncThunk("department/departmentUpdatio
       const message = err.message;
       ToastNotification("error", message);
     }
-    return thunkApi.rejectWithMessage(message);
+    return thunkApi.rejectWithValue(message);
   }
 });
 
@@ -107,7 +107,7 @@ export const departmentSearch = createAsyncThunk("department/departmentSearch", 
   } catch (error) {
     const message = error.responce.data.message;
     ToastNotification("error", message);
-    return thunkApi.rejectWithMessage(message);
+    return thunkApi.rejectWithValue(message);
   }
 });
 

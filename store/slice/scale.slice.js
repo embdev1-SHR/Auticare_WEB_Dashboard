@@ -34,7 +34,7 @@ export const ScaleSearchScales = createAsyncThunk(
         ;
     } catch (error) {
       const message = error.responce.data.message;
-      return thunkApi.rejectWithMessage(message);
+      return thunkApi.rejectWithValue(message);
     }
   }
 );
@@ -48,7 +48,7 @@ export const ScaleDetails = createAsyncThunk(
         ;
     } catch (error) {
       const message = error.responce.data.message;
-      return thunkApi.rejectWithMessage(message);
+      return thunkApi.rejectWithValue(message);
     }
   }
 );
@@ -112,7 +112,7 @@ export const fetchAllScales = createAsyncThunk(
       return data.results.data;
     } catch (error) {
       const message = error.responce.data.message;
-      return thunkApi.rejectWithMessage(message);
+      return thunkApi.rejectWithValue(message);
     }
   }
 );
@@ -148,7 +148,7 @@ export const fetchAllCategoryScaleID = createAsyncThunk(
       return res.data.results.data;
     } catch (error) {
       const message = error.responce.data.message;
-      return thunkApi.rejectWithMessage(message);
+      return thunkApi.rejectWithValue(message);
     }
   }
 );
@@ -161,7 +161,7 @@ export const fetchAllQuestions = createAsyncThunk(
       return res.data.results.data;
     } catch (error) {
       const message = error.responce.data.message;
-      return thunkApi.rejectWithMessage(message);
+      return thunkApi.rejectWithValue(message);
     }
   }
 );
@@ -174,7 +174,7 @@ export const fetchAllAssessmentQuestions = createAsyncThunk(
       return res.data.results.data;
     } catch (error) {
       const message = error.responce.data.message;
-      return thunkApi.rejectWithMessage(message);
+      return thunkApi.rejectWithValue(message);
     }
   }
 );

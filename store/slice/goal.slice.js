@@ -9,7 +9,7 @@ export const fetchAllGoals = createAsyncThunk("goal/fetchAllGoals", async (thunk
     return data.results.data;
   } catch (error) {
     const message = error.responce.data.message;
-    return thunkApi.rejectWithMessage(message);
+    return thunkApi.rejectWithValue(message);
   }
 });
 export const getGoalsByTherapy = createAsyncThunk("goal/getGoalsByTherapy", async (data, thunkApi) => {

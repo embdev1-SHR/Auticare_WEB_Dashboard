@@ -50,7 +50,7 @@ export const getAllSubscriptionPlans = createAsyncThunk("subscription/getAllSubs
   } catch (error) {
     console.log(error);
     const message = error.response.data.errors.message;
-    return thunkApi.rejectWithMessage(message);
+    return thunkApi.rejectWithValue(message);
   }
 });
 

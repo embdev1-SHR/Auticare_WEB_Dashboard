@@ -9,7 +9,7 @@ export const fetchAllSkills = createAsyncThunk("skill/fetchAllSkills", async (ar
     return data.results.data;
   } catch (error) {
     const message = error.responce.data.message;
-    return thunkApi.rejectWithMessage(message);
+    return thunkApi.rejectWithValue(message);
   }
 });
 export const createSkill = createAsyncThunk("skill/createSkill", async (data, thunkApi) => {
@@ -60,7 +60,7 @@ export const searchSkill = createAsyncThunk("skill/searchSkill", async (SkillNam
     return res.data.results.data;
   } catch (error) {
     const message = error.responce.data.message;
-    return thunkApi.rejectWithMessage(message);
+    return thunkApi.rejectWithValue(message);
   }
 });
 
@@ -70,7 +70,7 @@ export const fetchSkillMappings = createAsyncThunk("skill/fetchSkillMappings", a
     return data.results.data;
   } catch (error) {
     const message = error.responce.data.message;
-    return thunkApi.rejectWithMessage(message);
+    return thunkApi.rejectWithValue(message);
   }
 });
 const initialState = {

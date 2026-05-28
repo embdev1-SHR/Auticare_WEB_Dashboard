@@ -440,7 +440,7 @@ export const fetchAllPatients = createAsyncThunk("patient/fetchAllPatients", asy
     return data.results.data;
   } catch (error) {
     const message = error.responce.data.message;
-    return thunkApi.rejectWithMessage(message);
+    return thunkApi.rejectWithValue(message);
   }
 });
 
@@ -541,7 +541,7 @@ export const searchPatient = createAsyncThunk("patient/searchPatient", async (Pa
     return res.data.results.data;
   } catch (error) {
     const message = error.responce.data.message;
-    return thunkApi.rejectWithMessage(message);
+    return thunkApi.rejectWithValue(message);
   }
 });
 
@@ -553,7 +553,7 @@ export const fetchPatientMetrics = createAsyncThunk("patient/fetchPatientMetrics
   } catch (error) {
     console.log(error);
     const message = error.response.data.errors.message;
-    return thunkApi.rejectWithMessage(message);
+    return thunkApi.rejectWithValue(message);
   }
 });
 
@@ -566,7 +566,7 @@ export const createPatientMetrics = createAsyncThunk("patient/createPatientMetri
   } catch (error) {
     console.log(error);
     const message = error.response.data.errors.message;
-    return thunkApi.rejectWithMessage(message);
+    return thunkApi.rejectWithValue(message);
   }
 });
 
@@ -586,7 +586,7 @@ export const patientStartSession = createAsyncThunk("patient/patientStartSession
     }
   } catch (error) {
     const message = error.response.data.errors.message;
-    return thunkApi.rejectWithMessage(message);
+    return thunkApi.rejectWithValue(message);
   }
 });
 
@@ -601,7 +601,7 @@ export const patientScreeningMetricResponse = createAsyncThunk("patient/patientS
     console.log(error);
     ToastNotification("error", "failed");
     const message = error.response.data.errors.message;
-    return thunkApi.rejectWithMessage(message);
+    return thunkApi.rejectWithValue(message);
   }
 });
 export const patientAssessmentMetricResponse = createAsyncThunk("patient/patientAssessmentMetricResponse", async (payload, thunkApi) => {
@@ -614,7 +614,7 @@ export const patientAssessmentMetricResponse = createAsyncThunk("patient/patient
     ToastNotification("error", "failed");
     console.log(error);
     const message = error.response.data.errors.message;
-    return thunkApi.rejectWithMessage(message);
+    return thunkApi.rejectWithValue(message);
   }
 });
 export const fetchMetricResponseDetails = createAsyncThunk("patient/fetchMetricResponseDetails", async (payload, thunkApi) => {
@@ -625,7 +625,7 @@ export const fetchMetricResponseDetails = createAsyncThunk("patient/fetchMetricR
   } catch (error) {
     console.log(error);
     const message = error.response.data.errors.message;
-    return thunkApi.rejectWithMessage(message);
+    return thunkApi.rejectWithValue(message);
   }
 });
 export const fetchScreeningMetricResponseList = createAsyncThunk("patient/fetchScreeningMetricResponseList", async (payload, thunkApi) => {
@@ -636,7 +636,7 @@ export const fetchScreeningMetricResponseList = createAsyncThunk("patient/fetchS
   } catch (error) {
     console.log(error);
     const message = error.response.data.errors.message;
-    return thunkApi.rejectWithMessage(message);
+    return thunkApi.rejectWithValue(message);
   }
 });
 export const fetchAssessmentMetricResponseList = createAsyncThunk("patient/fetchAssessmentMetricResponseList", async (payload, thunkApi) => {
@@ -647,7 +647,7 @@ export const fetchAssessmentMetricResponseList = createAsyncThunk("patient/fetch
   } catch (error) {
     console.log(error);
     const message = error.response.data.errors.message;
-    return thunkApi.rejectWithMessage(message);
+    return thunkApi.rejectWithValue(message);
   }
 });
 export const createPlan = createAsyncThunk("patient/createPlan", async (payload, thunkApi) => {
@@ -662,7 +662,7 @@ export const createPlan = createAsyncThunk("patient/createPlan", async (payload,
     console.log(error);
     ToastNotification("error", "plan creation failed");
     const message = error.response.data.errors.message;
-    return thunkApi.rejectWithMessage(message);
+    return thunkApi.rejectWithValue(message);
   }
 });
 export const fetchPatientPlanList = createAsyncThunk("patient/fetchPatientPlanList", async (payload, thunkApi) => {
@@ -673,7 +673,7 @@ export const fetchPatientPlanList = createAsyncThunk("patient/fetchPatientPlanLi
   } catch (error) {
     console.log(error);
     const message = error.response.data.errors.message;
-    return thunkApi.rejectWithMessage(message);
+    return thunkApi.rejectWithValue(message);
   }
 });
 export const fetchPatientPlanGoalList = createAsyncThunk("patient/fetchPatientPlanGoalList", async (payload, thunkApi) => {
@@ -686,7 +686,7 @@ export const fetchPatientPlanGoalList = createAsyncThunk("patient/fetchPatientPl
   } catch (error) {
     console.log(error);
     const message = error.response.data.errors.message;
-    return thunkApi.rejectWithMessage(message);
+    return thunkApi.rejectWithValue(message);
   }
 });
 export const updatePatientPlan = createAsyncThunk("patient/updatePatientPlan", async (data, thunkApi) => {
@@ -733,7 +733,7 @@ export const fetchPatientIssuesList = createAsyncThunk("patient/fetchPatientIssu
     return res.data.results.data;
   } catch (error) {
     const message = error.responce.data.message;
-    return thunkApi.rejectWithMessage(message);
+    return thunkApi.rejectWithValue(message);
   }
 });
 
