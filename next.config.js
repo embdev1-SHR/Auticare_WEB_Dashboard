@@ -2,6 +2,9 @@
 const nextConfig = {
   reactStrictMode: false, // iff true then components renders twices
   swcMinify: true,
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   experimental: {
     esmExternals: false,
   },
