@@ -58,7 +58,7 @@ function Documents() {
   return (
     <div>
       <div className='mb-4'>
-        <Label className='form-label required' htmlFor='IncorporationCertificateURL'>
+        <Label className='form-label' htmlFor='IncorporationCertificateURL'>
           Incorporation certificate
         </Label>
 
@@ -67,7 +67,7 @@ function Documents() {
         {errors.IncorporationCertificateURL && touched.IncorporationCertificateURL ? <ErrorMessage className='text-danger small' name='IncorporationCertificateURL' component='div' /> : null}
       </div>
       <div className='mb-4'>
-        <Label className='form-label required' htmlFor='RegistrationCertificateURL'>
+        <Label className='form-label' htmlFor='RegistrationCertificateURL'>
           Registration certificate
         </Label>
 

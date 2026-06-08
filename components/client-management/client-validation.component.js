@@ -68,8 +68,8 @@ export const renderValidation = (tab) => {
       });
     case 3:
       return yup.object().shape({
-        IncorporationCertificateURL: yup.mixed().required("Please upload incorporation certificate"),
-        RegistrationCertificateURL: yup.mixed().required("Please upload registration certificate"),
+        IncorporationCertificateURL: yup.mixed().nullable(),
+        RegistrationCertificateURL: yup.mixed().nullable(),
       });
 
     default:
