@@ -93,7 +93,7 @@ function BasicDetails() {
       </div>
 
       <div className='mb-4'>
-        <Label className='form-label required' htmlFor='ClientLogo'>
+        <Label className='form-label' htmlFor='ClientLogo'>
           Client Logo
         </Label>
 

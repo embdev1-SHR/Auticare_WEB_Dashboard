@@ -7,7 +7,7 @@ export const renderValidation = (tab) => {
     case 1:
       return yup.object().shape({
         ClientName: yup.string().min(2, "Too Short!").max(200, "Too Long!").required("Please enter a client name"),
-        ClientLogo: yup.mixed().required("Please upload client logo"),
+        ClientLogo: yup.mixed().nullable(),
         EmailId: yup
           .string()
           .email("Invalid email")
