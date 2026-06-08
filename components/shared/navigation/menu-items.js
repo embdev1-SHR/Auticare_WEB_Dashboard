@@ -5,6 +5,7 @@ export const Menuitems = [
     icon: "ri-home-line",
     location: "dashboard",
   },
+  // SuperAdmin-only items
   {
     tag: "ClientManagement",
     title: "Client Management",
@@ -24,10 +25,22 @@ export const Menuitems = [
     location: "subscriptions",
   },
   {
-    tag: "ScaleManagement",
-    title: "Scale Creation",
-    icon: "ri-scan-line",
-    location: "scales",
+    tag: "PaymentReports",
+    title: "Payment Reports",
+    icon: "ri-bank-card-line",
+    location: "payment-reports",
+  },
+  {
+    tag: "StoreInquiries",
+    title: "Store Enquiries",
+    icon: "ri-shield-user-line",
+    location: "store-enquiries",
+  },
+  {
+    tag: "Resources",
+    title: "Free Resources",
+    icon: "dripicons-document",
+    location: "free-resource",
   },
   {
     tag: "AssessmentManagement",
@@ -35,18 +48,7 @@ export const Menuitems = [
     icon: "ri-questionnaire-line",
     location: "assessments",
   },
-  {
-    tag: "SkillManagement",
-    title: "Skill Management",
-    icon: "ri-file-text-line",
-    location: "skills",
-  },
-  {
-    tag: "ContentManagement",
-    title: "Content Management",
-    icon: "ri-tv-2-line",
-    location: "contents",
-  },
+  // Center-visible items in required order
   {
     tag: "DepartmentManagement",
     title: "Departments",
@@ -78,27 +80,27 @@ export const Menuitems = [
     location: "therapies",
   },
   {
-    tag: "PaymentReports",
-    title: "Payment Reports",
-    icon: "ri-bank-card-line",
-    location: "payment-reports",
+    tag: "ScaleManagement",
+    title: "Scale Creation",
+    icon: "ri-scan-line",
+    location: "scales",
+  },
+  {
+    tag: "SkillManagement",
+    title: "Skill Management",
+    icon: "ri-file-text-line",
+    location: "skills",
+  },
+  {
+    tag: "ContentManagement",
+    title: "Content Management",
+    icon: "ri-tv-2-line",
+    location: "contents",
   },
   {
     tag: "ATStore",
     title: "AT Store",
     icon: "ri-store-line",
     location: "at-store",
-  },
-  {
-    tag: "StoreInquiries",
-    title: "Store Enquiries",
-    icon: "ri-shield-user-line",
-    location: "store-enquiries",
-  },
-  {
-    tag: "Resources",
-    title: "Free Resources",
-    icon: "dripicons-document",
-    location: "free-resource",
   },
 ];

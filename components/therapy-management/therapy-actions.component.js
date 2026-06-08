@@ -46,8 +46,8 @@ function TherapyActions({ Therapy }) {
         </DropdownToggle>
         <DropdownMenu className='dropdown-menu-right-custom' style={{marginBottom:"-110%",marginRight:"20%"}} j>
           <DropdownItem onClick={ViewTherapyDetails}>View Details</DropdownItem>
-          {UserId === Therapy?.Create_By && <><DropdownItem onClick={onEditTherapy}>Edit</DropdownItem>
-            <DropdownItem onClick={() => onHandleDelete(Therapy.TherapyID)}>Delete</DropdownItem></>}
+          <DropdownItem onClick={onEditTherapy}>Edit</DropdownItem>
+          <DropdownItem onClick={() => onHandleDelete(Therapy.TherapyID)}>Delete</DropdownItem>
         </DropdownMenu>
       </Dropdown>
       {alert ? <Alert onHandleConfirm={onDeleteConfirm} onDelete={onHandleDeleteCancel} /> : null}

@@ -1,17 +1,18 @@
 
+import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Button, Label } from "reactstrap";
-import { activateClientSubscription, clientDeletion, selectClient, selectIsLoading } from "../../../store/slice/client.slice";
+import Alert from "../../shared/alert";
+import { activateClientSubscription, clientDeletion, clientPermanentDeletion, selectClient, selectIsLoading } from "../../../store/slice/client.slice";
 import Breadcrumb from "../../shared/breadcrumb";
 
 function ClientHeader() {
   const client = useSelector(selectClient);
   const loading = useSelector(selectIsLoading);
-
-
+  const [deleteAlert, setDeleteAlert] = useState(false);
 
   const dispatch = useDispatch();
-  //Subscription Due Date
+
   const date = client[0] && new Date(client[0].SubcriptionPlanEndDate),
     formattedDate =
       date &&
@@ -20,28 +21,23 @@ function ClientHeader() {
         month: "long",
         year: "numeric",
       });
-  // Subscription Progress
+
   const start = client[0] && new Date(client[0].SubscriptionPlanActivatedDate),
     end = client[0] && new Date(client[0].SubcriptionPlanEndDate),
     today = new Date(),
     subscriptionProgress = Math.round(((today - start) / (end - start)) * 100);
 
-
   function HandleSuspend() {
-
-    const valueToSend={
-      clientId:client[0].ClientID,
-      client:false
-    }
-
-    dispatch(clientDeletion(valueToSend));
+    dispatch(clientDeletion({ clientId: client[0].ClientID, client: false }));
   }
+
   function HandleEnable() {
-    const valueToSend={
-      clientId:client[0].ClientID,
-      client:true
-    }
-    dispatch(clientDeletion(valueToSend));
+    dispatch(clientDeletion({ clientId: client[0].ClientID, client: true }));
+  }
+
+  function onDeleteConfirm() {
+    setDeleteAlert(false);
+    dispatch(clientPermanentDeletion(client[0].ClientID));
   }
 
   return client.length > 0 ? (
@@ -56,8 +52,7 @@ function ClientHeader() {
         </div>
       </div>
       <div className='patient_plan'>
-        <div className='plan_grid' style={{width:"130%"}}
-        >
+        <div className='plan_grid' style={{width:"130%"}}>
           <div className='plan_ico'>
             <i className='ri-heart-line'></i>
           </div>
@@ -86,12 +81,15 @@ function ClientHeader() {
         >
           Activate (1 Month)
         </Button>
-        {client[0].Status == 1 ? <Button type='button' disabled={loading} className='btn btn-danger waves-effect waves-light' onClick={HandleSuspend}>
-          Suspend
-        </Button> : <Button type='button' disabled={loading}  color='success'  className='btn  waves-effect waves-light' onClick={HandleEnable}>
-          Enable
-        </Button>}
+        {client[0].Status == 1
+          ? <Button type='button' disabled={loading} className='btn btn-danger waves-effect waves-light' onClick={HandleSuspend}>Suspend</Button>
+          : <Button type='button' disabled={loading} color='success' className='btn waves-effect waves-light' onClick={HandleEnable}>Enable</Button>
+        }
+        <Button type='button' disabled={loading} color='danger' className='btn waves-effect waves-light' onClick={() => setDeleteAlert(true)}>
+          Delete
+        </Button>
       </div>
+      {deleteAlert && <Alert onHandleConfirm={onDeleteConfirm} onDelete={() => setDeleteAlert(false)} />}
     </div>
   ) : null;
 }

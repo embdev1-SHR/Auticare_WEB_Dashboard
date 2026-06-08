@@ -26,6 +26,11 @@ export const deleteClient = async (ClientID) => {
   return result;
 };
 
+export const permanentDeleteClient = async (ClientID) => {
+  const result = await Axios.delete(`/api/v1/clients/${ClientID}/permanent`);
+  return result;
+};
+
 export const searchClient = async (data) => {
   const result = await Axios.post(`/api/v1/clients/search`, data);
   return result;

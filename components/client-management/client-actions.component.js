@@ -2,7 +2,7 @@ import { useRouter } from "next/router";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Dropdown, DropdownItem, DropdownMenu, DropdownToggle } from "reactstrap";
-import { clientDeletion, selectCurrentClientId, setCurrentClientId, setEdit } from "../../store/slice/client.slice";
+import { clientDeletion, clientPermanentDeletion, selectCurrentClientId, setCurrentClientId, setEdit } from "../../store/slice/client.slice";
 import { selectAlertConfirm } from "../../store/slice/layout.slice";
 import Alert from "../shared/alert";
 
@@ -19,7 +19,7 @@ function ClientActions({ ClientId ,Status}) {
 
   const onHandleConfirm = async () => {
     setAlert(false);
-    const result = await dispatch(clientDeletion(currentId));
+    await dispatch(clientPermanentDeletion(currentId));
   };
 
   const onEdit = () => {
@@ -74,8 +74,8 @@ function ClientActions({ ClientId ,Status}) {
         
         
           {Status? <DropdownItem onClick={HandleSuspend}>Suspend</DropdownItem> : <DropdownItem onClick={HandleEnable}>Enable</DropdownItem>}
-        
-        
+          <DropdownItem divider />
+          <DropdownItem className="text-danger" onClick={() => onDelete(ClientId)}>Delete</DropdownItem>
         </DropdownMenu>
       </Dropdown>
       {alert ? <Alert onHandleConfirm={onHandleConfirm} /> : null}

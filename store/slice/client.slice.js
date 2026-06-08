@@ -2,7 +2,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { HYDRATE } from "next-redux-wrapper";
 import Router from "next/router";
 import { ToastNotification } from "../../components/shared/toast";
-import { activateSubscription, createClient, deleteClient, fetchAllClients, fetchClientDetails, searchClient, updateClient } from "../../services/client.services";
+import { activateSubscription, createClient, deleteClient, permanentDeleteClient, fetchAllClients, fetchClientDetails, searchClient, updateClient } from "../../services/client.services";
 import { setModalOpen } from "./layout.slice";
 
 const initialState = {
@@ -116,6 +116,20 @@ export const clientDeletion = createAsyncThunk("client/clientDeletion", async (C
   }
 });
 
+export const clientPermanentDeletion = createAsyncThunk("client/clientPermanentDeletion", async (ClientID, thunkApi) => {
+  try {
+    const { data } = await permanentDeleteClient(ClientID);
+    const results = data.results;
+    data.success && ToastNotification("success", results.message);
+    thunkApi.dispatch(getAllClients());
+    return results;
+  } catch (error) {
+    const message = error.response.data.errors.message;
+    ToastNotification("error", message);
+    return thunkApi.rejectWithValue(message);
+  }
+});
+
 export const clientSearch = createAsyncThunk("client/clientSearch", async (searchData, thunkApi) => {
   try {
     const res = await searchClient(searchData);
@@ -220,6 +234,15 @@ export const clientSlice = createSlice({
         state.isLoading = false;
       })
       .addCase(clientDeletion.rejected, (state) => {
+        state.isLoading = false;
+      })
+      .addCase(clientPermanentDeletion.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(clientPermanentDeletion.fulfilled, (state) => {
+        state.isLoading = false;
+      })
+      .addCase(clientPermanentDeletion.rejected, (state) => {
         state.isLoading = false;
       })
       .addCase(clientSearch.pending, (state) => {
