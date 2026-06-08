@@ -101,7 +101,7 @@ export const renderValidation = (tab) => {
           .min(15, "GST Number must be 15 characters long!")
           .max(15, "GST Number must be 15 characters long!")
           .matches(/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/, "Invalid GST number")
-          .required("Please enter GST Number"),
+          .nullable(),
         BankAccountNumber: yup
           .string()
           .matches(/^[0-9\b]+$/, "Invalid account number")

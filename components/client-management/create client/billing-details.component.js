@@ -170,7 +170,7 @@ function BillingDetails() {
 
         <Col md="6">
           <div className="mb-4">
-            <Label className="form-label required">GST Number</Label>
+            <Label className="form-label">GST Number</Label>
             <Field type="text" className="form-control" placeholder="Enter gst no" name="GSTNumber" />
             {errors.GSTNumber && touched.GSTNumber ? <ErrorMessage className="text-danger small" name="GSTNumber" component="div" /> : null}
           </div>
