@@ -9,6 +9,7 @@ import {
   getClient,
   selectClient,
   selectIsLoading,
+  setEdit,
 } from "../../store/slice/client.slice";
 import { changeBreadcrumb } from "../../store/slice/layout.slice";
 
@@ -28,7 +29,7 @@ function ClientDetail() {
   const [customActiveTab, setCustomActiveTab] = useState(1);
   const dispatch = useDispatch();
   const router = useRouter();
-  const { clientId } = router.query;
+  const { clientId, edit } = router.query;
   const IsLoad = useSelector(selectIsLoading);
   const Client = useSelector(selectClient);
   const NavArray = [
@@ -65,6 +66,11 @@ function ClientDetail() {
     if (clientId !== undefined) dispatch(getClient(clientId));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clientId]);
+
+  useEffect(() => {
+    dispatch(setEdit(edit === "true"));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [edit]);
 
   // Client updation
   const onSubmit = async (values) => {

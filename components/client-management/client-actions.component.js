@@ -22,18 +22,20 @@ function ClientActions({ ClientId ,Status}) {
     await dispatch(clientPermanentDeletion(currentId));
   };
 
+  const onCancelDelete = () => {
+    setAlert(false);
+  };
+
   const onEdit = () => {
-    dispatch(setEdit(true));
     router.push({
-      pathname: "clients/[ClientId]",
-      query: { ClientId },
+      pathname: "/clients/[clientId]",
+      query: { clientId: ClientId, edit: "true" },
     });
   };
   const onView = () => {
-    dispatch(setEdit(false));
     router.push({
-      pathname: "clients/[ClientId]",
-      query: { ClientId },
+      pathname: "/clients/[clientId]",
+      query: { clientId: ClientId },
     });
   };
   const onDelete = (id) => {
@@ -78,7 +80,7 @@ function ClientActions({ ClientId ,Status}) {
           <DropdownItem className="text-danger" onClick={() => onDelete(ClientId)}>Delete</DropdownItem>
         </DropdownMenu>
       </Dropdown>
-      {alert ? <Alert onHandleConfirm={onHandleConfirm} /> : null}
+      {alert ? <Alert onHandleConfirm={onHandleConfirm} onDelete={onCancelDelete} /> : null}
     </div>
   );
 }
