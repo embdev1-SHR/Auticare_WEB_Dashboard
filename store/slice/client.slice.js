@@ -184,8 +184,7 @@ export const clientSlice = createSlice({
       })
       .addCase(getAllClients.fulfilled, (state, action) => {
         state.isLoading = false;
-        //state.clientList = action.payload.filter((client) => client.Status !== 0);
-        state.clientList = action.payload;
+        state.clientList = action.payload.filter((client) => client.Status !== 0);
       })
       .addCase(getAllClients.rejected, (state) => {
         state.isLoading = false;
