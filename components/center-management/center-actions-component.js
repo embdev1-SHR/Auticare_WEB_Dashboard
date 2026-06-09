@@ -38,11 +38,11 @@ function CenterActions({ CenterID }) {
   };
   const handleClickEdit = async () => {
     await dispatch(setCenterEdit(true));
-    await router.push(`centers/${CenterID}`);
+    await router.push(`/centers/${CenterID}?edit=true`);
   };
   const handleClickView = async () => {
     await dispatch(setCenterEdit(false));
-    await router.push(`centers/${CenterID}`);
+    await router.push(`/centers/${CenterID}`);
   };
   const onHandleDelete = async () => {
     setAlert(false);

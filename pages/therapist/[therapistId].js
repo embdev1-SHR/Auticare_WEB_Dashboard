@@ -11,13 +11,13 @@ import TherapistDocuments from "../../components/therapist-management/view-thera
 import TherapistHeader from "../../components/therapist-management/view-therapist/therapistHeader.component";
 import TherapistJobDetails from "../../components/therapist-management/view-therapist/therapistJobDetails.component";
 import { changeBreadcrumb } from "../../store/slice/layout.slice";
-import { getTherapist, selectIsLoading, selectTherapist } from "../../store/slice/therapist.slice";
+import { getTherapist, selectIsLoading, selectTherapist, setEdit } from "../../store/slice/therapist.slice";
 import withAuth from "../../util/helpers/withAuth";
 
 function TherapistDetail() {
   const dispatch = useDispatch();
   const router = useRouter();
-  const { therapistId } = router.query;
+  const { therapistId, edit } = router.query;
   const IsLoading = useSelector(selectIsLoading);
   const Therapist = useSelector(selectTherapist);
   const [customActiveTab, setCustomActiveTab] = useState(1);
@@ -37,6 +37,11 @@ function TherapistDetail() {
     if (therapistId !== undefined) dispatch(getTherapist(therapistId));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [therapistId]);
+
+  useEffect(() => {
+    dispatch(setEdit(edit === "true"));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [edit]);
 
   const NavArray = ["Basic Details", "Profile & Documents", "Job Details"];
   const toggleCustomJustified = (tab) => {

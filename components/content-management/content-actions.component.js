@@ -32,11 +32,11 @@ function ContentActions({ content }) {
 
   const handleClickEdit = async () => {
     await dispatch(setContentEdit(true));
-    await router.push(`contents/${content.ContentID}`);
+    await router.push(`/contents/${content.ContentID}?edit=true`);
   };
   const handleClickView = async () => {
     await dispatch(setContentEdit(false));
-    await router.push(`contents/${content.ContentID}`);
+    await router.push(`/contents/${content.ContentID}`);
   };
   return (
     <div className='dropdown float-right'>

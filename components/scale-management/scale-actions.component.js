@@ -18,7 +18,7 @@ function ScaleActions({ scale }) {
 
   function viewScaleDetails(scale) {
     dispatch(isEditScale(false));
-    router.push(`scales/${scale.ScaleID}/${scale.ScaleMetric.toLowerCase()}/${scale.ScaleMetricType.toLowerCase()}`);
+    router.push(`/scales/${scale.ScaleID}/${scale.ScaleMetric.toLowerCase()}/${scale.ScaleMetricType.toLowerCase()}`);
   }
 
   const handleClickEdit = async (scale) => {

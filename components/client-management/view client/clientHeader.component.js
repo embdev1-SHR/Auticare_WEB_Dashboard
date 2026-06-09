@@ -1,6 +1,7 @@
 
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useRouter } from "next/router";
 import { Button, Label } from "reactstrap";
 import Alert from "../../shared/alert";
 import { activateClientSubscription, clientDeletion, clientPermanentDeletion, selectClient, selectIsLoading } from "../../../store/slice/client.slice";
@@ -12,6 +13,7 @@ function ClientHeader() {
   const [deleteAlert, setDeleteAlert] = useState(false);
 
   const dispatch = useDispatch();
+  const router = useRouter();
 
   const date = client[0] && new Date(client[0].SubcriptionPlanEndDate),
     formattedDate =
@@ -35,9 +37,10 @@ function ClientHeader() {
     dispatch(clientDeletion({ clientId: client[0].ClientID, client: true }));
   }
 
-  function onDeleteConfirm() {
+  async function onDeleteConfirm() {
     setDeleteAlert(false);
-    dispatch(clientPermanentDeletion(client[0].ClientID));
+    await dispatch(clientPermanentDeletion(client[0].ClientID));
+    router.push("/clients");
   }
 
   return client.length > 0 ? (

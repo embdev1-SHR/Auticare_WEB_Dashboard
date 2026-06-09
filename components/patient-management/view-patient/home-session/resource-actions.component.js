@@ -15,11 +15,11 @@ function ResourceActions({ value }) {
 
   const handleClickView = async () => {
     dispatch(setHomeSessionEdit(false));
-    await router.push(`${value.PatientID}/home-session/${value.HomeSessionID}`);
+    await router.push(`/patients/${value.PatientID}/home-session/${value.HomeSessionID}`);
   };
   const handleClickEdit = async () => {
     dispatch(setHomeSessionEdit(true));
-    await router.push(`${value.PatientID}/home-session/${value.HomeSessionID}`);
+    await router.push(`/patients/${value.PatientID}/home-session/${value.HomeSessionID}?edit=true`);
   };
   const onDelete = () => {
     setAlert(true);

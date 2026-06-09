@@ -25,10 +25,9 @@ const ScreeningListActions = ({ PatientMetric }) => {
   const router = useRouter()
   function handleViewDetails() {
     if (PatientMetric.CompletionStatus == null) {
-      router.push(`${PatientMetric.PatientID}/scales/${PatientMetric.ScaleID}/${PatientMetric.ScaleMetricType.toLowerCase()}/${PatientMetric.PatientMetricID}`)
-    }
-    else {
-      router.push(`${PatientMetric.PatientID}/scales/${PatientMetric.ScaleID}/${PatientMetric.ScaleMetricType.toLowerCase()}/${PatientMetric.PatientMetricID}/result`)
+      router.push(`/patients/${PatientMetric.PatientID}/scales/${PatientMetric.ScaleID}/${PatientMetric.ScaleMetricType.toLowerCase()}/${PatientMetric.PatientMetricID}`);
+    } else {
+      router.push(`/patients/${PatientMetric.PatientID}/scales/${PatientMetric.ScaleID}/${PatientMetric.ScaleMetricType.toLowerCase()}/${PatientMetric.PatientMetricID}/result`);
     }
   }
   function createFormatDate(date) {

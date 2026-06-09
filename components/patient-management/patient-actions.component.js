@@ -44,11 +44,11 @@ function PatientActions(patient) {
   };
   const handleClickEdit = async () => {
     await dispatch(setPatientEdit(true));
-    await router.push(`patients/${patient.patient.PatientID ? patient.patient.PatientID : patient.PatientID}`);
+    await router.push(`/patients/${patient.patient.PatientID ? patient.patient.PatientID : patient.PatientID}?edit=true`);
   };
   const handleClickView = async () => {
     await dispatch(setPatientEdit(false));
-    await router.push(`patients/${patient.patient.PatientID ? patient.patient.PatientID : patient.PatientID}`);
+    await router.push(`/patients/${patient.patient.PatientID ? patient.patient.PatientID : patient.PatientID}`);
   };
   const onHandleDelete = async () => {
     setAlert(false);

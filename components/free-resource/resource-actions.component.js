@@ -17,11 +17,11 @@ function ResourceActions({ FreeResourceID, value }) {
 
   const handleClickView = async () => {
     dispatch(setResourceEdit(false));
-    await router.push(`free-resource/${FreeResourceID.FreeResourceID || FreeResourceID}`);
+    await router.push(`/free-resource/${FreeResourceID.FreeResourceID || FreeResourceID}`);
   };
   const handleClickEdit = async () => {
     dispatch(setResourceEdit(true));
-    await router.push(`free-resource/${FreeResourceID.FreeResourceID || FreeResourceID}`);
+    await router.push(`/free-resource/${FreeResourceID.FreeResourceID || FreeResourceID}?edit=true`);
   };
   const onDelete = (id) => {
     setAlert(true);

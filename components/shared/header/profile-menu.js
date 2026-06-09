@@ -47,7 +47,7 @@ function ProfileMenu() {
             <i className='mdi mdi-chevron-down d-none ms-1 d-xl-inline-block'></i>
           </DropdownToggle>
           <DropdownMenu className='dropdown-menu-end dropdown-menu-right'>
-            {UserData?.RoleName != "SuperAdmin" && <DropdownItem onClick={() => router.push("my-profile")}>
+            {UserData?.RoleName != "SuperAdmin" && <DropdownItem onClick={() => router.push("/my-profile")}>
               <i className='ri-user-line align-middle me-1'></i> My Profile
             </DropdownItem>}
             {/* <DropdownItem className='d-block' href='#'>

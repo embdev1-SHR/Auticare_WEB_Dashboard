@@ -7,11 +7,11 @@ const SessionListActions = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleStartSession = () => {
-    router.push(`\start-session`);
+    router.push(`/start-session`);
   };
 
   const handleSessionReport = () => {
-    router.push(`\session-report`);
+    router.push(`/session-report`);
   };
 
   return (

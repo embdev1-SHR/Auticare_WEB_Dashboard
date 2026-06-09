@@ -17,17 +17,15 @@ function TherapistActions({ Therapist }) {
   const UserId = useSelector(selectUserID);
   let TherapistID = Therapist.TherapistID
   const onEdit = () => {
-    dispatch(setEdit(true));
     router.push({
-      pathname: "therapist/[TherapistID]",
-      query: { TherapistID },
+      pathname: "/therapist/[therapistId]",
+      query: { therapistId: TherapistID, edit: "true" },
     });
   };
   const onView = () => {
-    dispatch(setEdit(false));
     router.push({
-      pathname: "therapist/[TherapistID]",
-      query: { TherapistID },
+      pathname: "/therapist/[therapistId]",
+      query: { therapistId: TherapistID },
     });
   };
   const onDelete = (id) => {

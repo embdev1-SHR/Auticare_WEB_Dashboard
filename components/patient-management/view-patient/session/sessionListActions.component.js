@@ -28,7 +28,7 @@ const SessionListActions = ({ session }) => {
   };
 
   const handleSessionReport = () => {
-    router.push(`${PatientId}/sessions/${session.SessionID}/report`);
+    router.push(`/patients/${PatientId}/sessions/${session.SessionID}/report`);
   };
   const handleDelete = () => {
     const valueToSend = {

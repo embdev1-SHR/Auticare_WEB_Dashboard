@@ -22,14 +22,10 @@ const AssessmentListActions = ({ PatientMetric }) => {
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
   function handleViewDetails() {
-    // if (PatientMetric.CompletionStatus == null) {
-    router.push(`${PatientMetric.PatientID}/scales/${PatientMetric.ScaleID}/${PatientMetric.ScaleMetricType.toLowerCase()}/${PatientMetric.PatientMetricID}`);
-    // } else {
-    //   router.push(`${PatientMetric.PatientID}/scales/${PatientMetric.ScaleID}/${PatientMetric.ScaleMetricType.toLowerCase()}/${PatientMetric.PatientMetricID}/result`);
-    // }
+    router.push(`/patients/${PatientMetric.PatientID}/scales/${PatientMetric.ScaleID}/${PatientMetric.ScaleMetricType.toLowerCase()}/${PatientMetric.PatientMetricID}`);
   }
   function handleViewResults() {
-    router.push(`${PatientMetric.PatientID}/scales/${PatientMetric.ScaleID}/${PatientMetric.ScaleMetricType.toLowerCase()}/${PatientMetric.PatientMetricID}/result`)
+    router.push(`/patients/${PatientMetric.PatientID}/scales/${PatientMetric.ScaleID}/${PatientMetric.ScaleMetricType.toLowerCase()}/${PatientMetric.PatientMetricID}/result`);
   }
   function createFormatDate(date) {
     return moment(new Date(date)).locale("en-in").format("MM/DD/YYYY");

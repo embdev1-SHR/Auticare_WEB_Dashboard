@@ -17,11 +17,11 @@ function PaymentActions({ PaymentID, values }) {
 
   const handleClickView = async () => {
     dispatch(setResourceEdit(false));
-    await router.push(`payment-reports/${PaymentID}`);
+    await router.push(`/payment-reports/${PaymentID}`);
   };
   const handleClickEdit = async () => {
     dispatch(setResourceEdit(true));
-    await router.push(`payment-reports/${PaymentID}`);
+    await router.push(`/payment-reports/${PaymentID}?edit=true`);
   };
   const onDelete = (id) => {
     setAlert(true);
