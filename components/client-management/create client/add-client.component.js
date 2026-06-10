@@ -91,6 +91,7 @@ function AddClient() {
       const payload = { ...values };
       if (!payload.IncorporationCertificateURL) delete payload.IncorporationCertificateURL;
       if (!payload.RegistrationCertificateURL) delete payload.RegistrationCertificateURL;
+      if (!payload.GSTNumber) delete payload.GSTNumber;
       await dispatch(clientCreation(payload));
     } else {
       toggleTab(activeTab + 1);
