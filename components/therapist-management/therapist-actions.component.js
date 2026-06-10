@@ -5,7 +5,7 @@ import { useRouter } from "next/router";
 import { useDispatch, useSelector } from "react-redux";
 import { selectAlertConfirm, setAlertConfirm } from "../../store/slice/layout.slice";
 import { selectCurrentTherapistId, setCurrentTherapistId, setEdit, therapistDeletion } from "../../store/slice/therapist.slice";
-import { selectUserID } from "../../store/slice/auth.slice";
+import { selectUserID, selectRole } from "../../store/slice/auth.slice";
 
 function TherapistActions({ Therapist }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -15,6 +15,8 @@ function TherapistActions({ Therapist }) {
   const IsAlert = useSelector(selectAlertConfirm);
   const [alert, setAlert] = useState(false);
   const UserId = useSelector(selectUserID);
+  const role = useSelector(selectRole);
+  const canManage = UserId === Therapist?.Create_By || ["SuperAdmin", "Admin", "Center"].includes(role);
   let TherapistID = Therapist.TherapistID
   const onEdit = () => {
     router.push({
@@ -48,7 +50,7 @@ function TherapistActions({ Therapist }) {
         </DropdownToggle>
         <DropdownMenu className="dropdown-menu-right-custom">
           <DropdownItem onClick={onView}>View Details</DropdownItem>
-          {UserId === Therapist?.Create_By && <><DropdownItem onClick={onEdit}>Edit</DropdownItem>
+          {canManage && <><DropdownItem onClick={onEdit}>Edit</DropdownItem>
             <DropdownItem onClick={() => onDelete(TherapistID)}>Delete</DropdownItem></>}
 
           {/* <DropdownItem>Suspend</DropdownItem> */}
