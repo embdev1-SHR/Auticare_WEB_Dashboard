@@ -18,7 +18,7 @@ import {
   setPatientEdit,
 } from "../../store/slice/patient.slice";
 import Alert from "../shared/alert";
-import { selectUserData, selectUserID } from "../../store/slice/auth.slice";
+import { selectUserData, selectUserID, selectRole } from "../../store/slice/auth.slice";
 
 
 function PatientActions(patient) {
@@ -26,6 +26,8 @@ function PatientActions(patient) {
   const router = useRouter();
   const dispatch = useDispatch();
   const UserId = useSelector(selectUserID);
+  const role = useSelector(selectRole);
+  const canManage = UserId === patient.patient?.Create_By || ["SuperAdmin", "Admin", "Center", "Therapist"].includes(role);
 
   const [isOpen, setIsOpen] = useState(false);
   const IsAlert = useSelector(selectAlertConfirm);
@@ -71,7 +73,7 @@ function PatientActions(patient) {
         </DropdownToggle>
         <DropdownMenu className="dropdown-menu-right-custom" style={{ marginBottom: "-110%", marginRight: "10%" }}>
           <DropdownItem onClick={handleClickView}>View Details</DropdownItem>
-          {UserId === patient.patient?.Create_By && <><DropdownItem onClick={handleClickEdit}>Edit</DropdownItem>
+          {canManage && <><DropdownItem onClick={handleClickEdit}>Edit</DropdownItem>
             <DropdownItem onClick={() => onDelete(patient.PatientID)}>
               Delete
             </DropdownItem></>}

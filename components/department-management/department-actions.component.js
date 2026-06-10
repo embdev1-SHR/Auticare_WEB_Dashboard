@@ -4,7 +4,7 @@ import { Dropdown, DropdownMenu, DropdownItem, DropdownToggle } from "reactstrap
 import { departmentDeletion, getDepartment, selectCurrentDepartmentId, setCurrentDepartmentId, setEdit, setView } from "../../store/slice/department.slice";
 import { selectAlertConfirm, setAlertConfirm, setModalOpen } from "../../store/slice/layout.slice";
 import Alert from "../shared/alert";
-import { selectUserID } from "../../store/slice/auth.slice";
+import { selectUserID, selectRole } from "../../store/slice/auth.slice";
 
 function DepartmentActions({ Department }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -13,6 +13,8 @@ function DepartmentActions({ Department }) {
   const currentId = useSelector(selectCurrentDepartmentId);
   const [alert, setAlert] = useState(false);
   const UserId = useSelector(selectUserID);
+  const role = useSelector(selectRole);
+  const canManage = UserId === Department.Create_By || ["SuperAdmin", "Admin", "Center"].includes(role);
 
   const onDeleteHandle = (id) => {
     dispatch(setCurrentDepartmentId(id));
@@ -46,7 +48,7 @@ function DepartmentActions({ Department }) {
         </DropdownToggle>
         <DropdownMenu style={{marginBottom:"-110%",marginRight:"20%"}}>
           <DropdownItem onClick={onView}>View Details</DropdownItem>
-          {UserId === Department.Create_By && <><DropdownItem onClick={onEdit}>Edit</DropdownItem>
+          {canManage && <><DropdownItem onClick={onEdit}>Edit</DropdownItem>
           <DropdownItem onClick={() => onDeleteHandle(Department.DepartmentID)}>Delete</DropdownItem> </>}
         </DropdownMenu>
       </Dropdown>
