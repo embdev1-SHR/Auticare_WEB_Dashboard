@@ -88,7 +88,10 @@ function AddClient() {
 
   const onSubmit = async (values) => {
     if (activeTab === 4) {
-      await dispatch(clientCreation(values));
+      const payload = { ...values };
+      if (!payload.IncorporationCertificateURL) delete payload.IncorporationCertificateURL;
+      if (!payload.RegistrationCertificateURL) delete payload.RegistrationCertificateURL;
+      await dispatch(clientCreation(payload));
     } else {
       toggleTab(activeTab + 1);
     }
