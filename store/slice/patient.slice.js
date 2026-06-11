@@ -1017,6 +1017,9 @@ export const patientSlice = createSlice({
         state.isLoading = false;
         state.homeSessionList = action.payload;
       })
+      .addCase(listHomeSession.rejected, (state) => {
+        state.isLoading = false;
+      })
       .addCase(createPlan.pending, (state, action) => {
         state.isLoading = true;
       })
@@ -1031,11 +1034,17 @@ export const patientSlice = createSlice({
       .addCase(createHomeSession.fulfilled, (state, action) => {
         state.isLoading = false;
       })
+      .addCase(createHomeSession.rejected, (state) => {
+        state.isLoading = false;
+      })
       .addCase(createPatientSession.pending, (state, action) => {
         state.isLoading = true;
       })
 
       .addCase(createPatientSession.fulfilled, (state, action) => {
+        state.isLoading = false;
+      })
+      .addCase(createPatientSession.rejected, (state) => {
         state.isLoading = false;
       })
       .addCase(patientCompleteCheck.pending, (state, action) => {
@@ -1279,6 +1288,9 @@ export const patientSlice = createSlice({
       .addCase(ContentMappingList.fulfilled, (state, action) => {
         state.isLoading = false;
         state.CondentMapping = action.payload;
+      })
+      .addCase(ContentMappingList.rejected, (state) => {
+        state.isLoading = false;
       })
   },
 });

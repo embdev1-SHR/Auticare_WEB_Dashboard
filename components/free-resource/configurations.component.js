@@ -21,7 +21,7 @@ const Configurations = ({ url, type, setContentConfiguration }) => {
     return (<>
       <div className='d-flex justify-content-between '>
       </div>
-      <video src={url} autoPlay controls style={{marginBottom:"5%", marginLeft:"25%", maxHeight:"300px" }}></video>
+      <video src={url} controls style={{marginBottom:"5%", marginLeft:"25%", maxHeight:"300px" }}></video>
     </>);
   }
   return (

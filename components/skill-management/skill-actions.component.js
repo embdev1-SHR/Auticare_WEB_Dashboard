@@ -21,7 +21,7 @@ import {
   setCurrentSkillId,
   skillIsEditForm
 } from "../../store/slice/skills.slice";
-import { selectUserID } from "../../store/slice/auth.slice";
+import { selectUserID, selectRole } from "../../store/slice/auth.slice";
 
 function SkillActions({ skill }) {
   const dispatch = useDispatch();
@@ -31,6 +31,8 @@ function SkillActions({ skill }) {
   const currentId = useSelector(selectCurrentSkillId);
   const [alert, setAlert] = useState(false);
   const UserId = useSelector(selectUserID);
+  const role = useSelector(selectRole);
+  const canManage = UserId === skill.Create_By || ["SuperAdmin", "Admin", "Center", "Therapist"].includes(role);
 
   const onHandleConfirm = async () => {
     setAlert(false);
@@ -64,9 +66,9 @@ function SkillActions({ skill }) {
           <i className="mdi mdi-dots-vertical"></i>
         </DropdownToggle>
         <DropdownMenu className="dropdown-menu-right-custom">
-          {UserId === skill.Create_By ? <><DropdownItem onClick={onEditHandle}>Edit</DropdownItem>
-            <DropdownItem onClick={() => onDelete(skill.SkillID)}>Delete</DropdownItem></> : 
-            <DropdownItem >No Options</DropdownItem>}
+          {canManage ? <><DropdownItem onClick={onEditHandle}>Edit</DropdownItem>
+            <DropdownItem onClick={() => onDelete(skill.SkillID)}>Delete</DropdownItem></> :
+            <DropdownItem>View Only</DropdownItem>}
         </DropdownMenu>
       </Dropdown>
       {alert ? <Alert onHandleConfirm={onHandleConfirm} onDelete={onHandleDelete} /> : null}

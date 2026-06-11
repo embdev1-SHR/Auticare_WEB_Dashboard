@@ -5,7 +5,7 @@ import { Dropdown, DropdownItem, DropdownMenu, DropdownToggle } from "reactstrap
 import { deleteContent, fetchAllContents, selectCurrentContentId, setContentEdit, setCurrentContentId } from "../../store/slice/content.slice";
 import { selectAlertConfirm } from "../../store/slice/layout.slice";
 import Alert from "../shared/alert";
-import { selectUserID } from "../../store/slice/auth.slice";
+import { selectUserID, selectRole } from "../../store/slice/auth.slice";
 
 function ContentActions({ content }) {
   const dispatch = useDispatch();
@@ -15,6 +15,8 @@ function ContentActions({ content }) {
   const currentId = useSelector(selectCurrentContentId);
   const [alert, setAlert] = useState(false);
   const UserId = useSelector(selectUserID);
+  const role = useSelector(selectRole);
+  const canManage = UserId === content.Create_By || ["SuperAdmin", "Admin", "Center", "Therapist"].includes(role);
 
   const onHandleConfirm = async () => {
     setAlert(false);
@@ -46,7 +48,7 @@ function ContentActions({ content }) {
         </DropdownToggle>
         <DropdownMenu className='dropdown-menu-right-custom' style={{ marginBottom: "-110%", marginRight: "10%" }} >
           <DropdownItem onClick={handleClickView}>View Details</DropdownItem>
-          {UserId === content.Create_By && <>
+          {canManage && <>
             <DropdownItem onClick={handleClickEdit}>Edit</DropdownItem>
             <DropdownItem onClick={() => onDelete(content.ContentID)}>Delete</DropdownItem></>}
         </DropdownMenu>

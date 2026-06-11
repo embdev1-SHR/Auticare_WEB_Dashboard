@@ -20,7 +20,7 @@ function ResourceListing(PatientId) {
         Header: "Media Tittle",
         accessor: "ResourceTitle",
         Cell: ({ row }) => {
-          return (<Link href={`${row.original.PatientID}/home-session/${row.original.HomeSessionID}`}>
+          return (<Link href={`/patients/${row.original.PatientID}/home-session/${row.original.HomeSessionID}`}>
             <a onClick={(e) => dispatch(setHomeSessionEdit(false))}>{row.values.ResourceTitle}</a>
           </Link>)
         },

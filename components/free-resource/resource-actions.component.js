@@ -5,7 +5,7 @@ import { Dropdown, DropdownItem, DropdownMenu, DropdownToggle } from "reactstrap
 import { UpdateFreeResources, setResourceEdit } from "../../store/slice/resource.slice";
 import Alert from "../shared/alert";
 import { useSelector } from "react-redux";
-import { selectUserID } from "../../store/slice/auth.slice";
+import { selectUserID, selectRole } from "../../store/slice/auth.slice";
 
 function ResourceActions({ FreeResourceID, value }) {
 
@@ -14,6 +14,8 @@ function ResourceActions({ FreeResourceID, value }) {
   const dispatch = useDispatch();
   const [alert, setAlert] = useState(false);
   const UserId = useSelector(selectUserID);
+  const role = useSelector(selectRole);
+  const canManage = UserId === value?.Create_By || ["SuperAdmin", "Admin", "Center", "Therapist"].includes(role);
 
   const handleClickView = async () => {
     dispatch(setResourceEdit(false));
@@ -54,7 +56,7 @@ function ResourceActions({ FreeResourceID, value }) {
         </DropdownToggle>
         <DropdownMenu className='dropdown-menu-right-custom' style={{marginBottom:"-110%",marginRight:"20%"}}>
           <DropdownItem onClick={handleClickView}>View Details</DropdownItem>
-          {UserId === value?.Create_By && <><DropdownItem onClick={handleClickEdit}>Edit</DropdownItem>
+          {canManage && <><DropdownItem onClick={handleClickEdit}>Edit</DropdownItem>
           <DropdownItem onClick={() => onDelete(FreeResourceID)}>Delete</DropdownItem></>}
         </DropdownMenu>
       </Dropdown>
