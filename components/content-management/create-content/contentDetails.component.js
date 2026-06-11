@@ -8,7 +8,7 @@ import { isEmpty } from "lodash";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useDispatch, useSelector } from "react-redux";
-import { selectUploadImageData, uploadImage } from "../../../store/slice/common.slice";
+import { uploadImage } from "../../../store/slice/common.slice";
 import { ContentDetails, ContentMappingList, contentDetailsLoading, contentIsLoading, selectContentIsEdit, selectContentMapping, updateContent } from "../../../store/slice/content.slice";
 import { fetchAllSkills, selectSkillList } from "../../../store/slice/skills.slice";
 import { getAllTherapies, selectTherapiesList } from "../../../store/slice/therapies.slice";
@@ -23,7 +23,6 @@ const ContentDetailsComponent = () => {
   const { ContentID } = router.query;
   const ContentIsEdit = useSelector(selectContentIsEdit);
   const loading = useSelector(contentIsLoading);
-  const fileS3url = useSelector(selectUploadImageData);
   const contentLoading = useSelector(contentDetailsLoading);
   const content = useSelector(ContentDetails);
   const Mapping = useSelector(selectContentMapping);
@@ -98,22 +97,6 @@ const ContentDetailsComponent = () => {
     });
   }, [ContentID, Mapping, content]);
 
-  const uploadFileUrl = async (uploadFiles) => {
-    if (uploadFiles.length > 0) {
-      setFileUploadLoading(true);
-      let formData = new FormData();
-      formData.append("imageFile", uploadFiles[0]);
-
-      try {
-        await dispatch(uploadImage(formData)).unwrap();
-        setFileUploadLoading(false);
-      } catch (rejectedValueOrSerializedError) {
-        // handle error here
-        setFileUploadLoading(false);
-      }
-    }
-  };
-
   const onSubmit = async (values) => {
     const forAdd = (a, b) => a.value === b.value;
     const forDelete = (a, b) => a.value === b.value;
@@ -136,7 +119,7 @@ const ContentDetailsComponent = () => {
       RemoveTherapyIDs: [...new Set(removedTherapy)].length == 0 ? undefined : [...new Set(removedTherapy)],
       RemoveSkillIDs: [...new Set(removedSkills)].length == 0 ? undefined : [...new Set(removedSkills)],
       ContentDescription: values.ContentDescription,
-      FileUploadURL: fileS3url ? fileS3url : content.FileUploadURL,
+      FileUploadURL: values.FileUploadURL || content.FileUploadURL || null,
       Status: true,
     };
     const filteredObject = {};
@@ -155,7 +138,22 @@ const ContentDetailsComponent = () => {
 
   return content && !contentLoading && Mapping ? (
     <Formik initialValues={contentInitials} onSubmit={onSubmit} enableReinitialize={true}>
-      {({ touched, errors, handleSubmit, resetForm, setFieldValue, isSubmitting, values }) => (
+      {({ touched, errors, handleSubmit, resetForm, setFieldValue, isSubmitting, values }) => {
+        const handleFileUpload = async (files) => {
+          if (!files.length) return;
+          setFileUploadLoading(true);
+          const fd = new FormData();
+          fd.append("imageFile", files[0]);
+          try {
+            const url = await dispatch(uploadImage(fd)).unwrap();
+            setFieldValue("FileUploadURL", url);
+          } catch (e) {
+            console.error(e);
+          } finally {
+            setFileUploadLoading(false);
+          }
+        };
+        return (
         <>
           {contentConfiguration ? (
             <Configurations setContentConfiguration={setContentConfiguration} fileFormat={content ? content.FileUploadURL : ""} />
@@ -262,7 +260,7 @@ const ContentDetailsComponent = () => {
                         multiFiles={false}
                         name='FileUploadURL'
                         isUploading={fileUploadLoading}
-                        fileData={uploadFileUrl}
+                        fileData={handleFileUpload}
                         displayName={values?.FileUploadURL}
                         content={content}
                       />
@@ -295,7 +293,8 @@ const ContentDetailsComponent = () => {
             </>
           )}
         </>
-      )}
+        );
+      }}
     </Formik>
   ) : (
     <Loader />
