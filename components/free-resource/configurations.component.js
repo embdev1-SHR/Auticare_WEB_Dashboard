@@ -1,33 +1,13 @@
 import AudioConfig from "./audioConfig.component";
 import ImageConfig from "./imageConfig.component";
+import { VideoPlayer } from "../patient-management/view-patient/home-session/vidoe-player";
 
-const Configurations = ({ url, type, setContentConfiguration }) => {
-
-  if (type == "Image") {
-    return (<>
-      <div className='d-flex justify-content-between '>
-      </div>
-      <ImageConfig url={url} />
-    </>);
-  }
-  if (type == "Audio") {
-    return (<>
-      <div className='d-flex justify-content-between '>
-      </div>
-      <AudioConfig url={url} />
-    </>);
-  }
-  if (type == "Video") {
-    return (<>
-      <div className='d-flex justify-content-between '>
-      </div>
-      <video src={url} controls style={{marginBottom:"5%", marginLeft:"25%", maxHeight:"300px" }}></video>
-    </>);
-  }
-  return (
-    <>
-    </>
-  );
+const Configurations = ({ url, type }) => {
+  if (!url || !type) return null;
+  if (type === "Image") return <ImageConfig url={url} />;
+  if (type === "Audio") return <AudioConfig url={url} />;
+  if (type === "Video") return <VideoPlayer file_src={url} overlays={[]} />;
+  return null;
 };
 
 export default Configurations;

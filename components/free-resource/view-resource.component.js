@@ -2,170 +2,192 @@ import { ErrorMessage, Field, Formik } from "formik";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Select from "react-select";
-import { Button, Label } from "reactstrap";
+import { Button, Card, CardBody, Label, Badge } from "reactstrap";
 import * as Yup from "yup";
 import { selectIsLoading, uploadImage } from "../../store/slice/common.slice";
 import { ResourceIsLoading, UpdateFreeResources, selectIsEdit, viewResource } from "../../store/slice/resource.slice";
 import DropZoneForm from "../shared/dropzoneform";
 import Configurations from "./configurations.component";
 
+const typeOptions = [
+  { label: "Image", value: "Image" },
+  { label: "Video", value: "Video" },
+  { label: "Audio", value: "Audio" },
+  { label: "Text", value: "Text" },
+];
+
+const fileAcceptMap = {
+  Image: [".jpeg", ".jpg", ".png", ".gif"],
+  Audio: [".mp3"],
+  Video: [".mp4"],
+};
+
+const typeBadgeColor = { Video: "primary", Audio: "success", Image: "warning", Text: "secondary" };
+
 function ViewResource(ResourceID) {
-    const dispatch = useDispatch();
-    const IsEdit = useSelector(selectIsEdit);
-    const data = useSelector(viewResource);
+  const dispatch = useDispatch();
+  const IsEdit = useSelector(selectIsEdit);
+  const data = useSelector(viewResource);
+  const loading = useSelector(ResourceIsLoading);
+  const imageUploading = useSelector(selectIsLoading);
 
+  const resource = data[0];
 
-    const loading = useSelector(ResourceIsLoading);
-    const [MediaType, setMediaType] = useState({ label: data[0]?.ResourceType, value: data[0]?.ResourceType });
-    const [id, setId] = useState(data[0]?.FreeResourceID);
-    const [url, setUrl] = useState(data[0]?.ResourceURL);
+  const [mediaType, setMediaType] = useState(null);
+  const [url, setUrl] = useState(null);
 
-    const [FileType, setFileType] = useState(null);
-    const options = [
-        { label: 'Image', value: 'Image' },
-        { label: 'Video', value: 'Video' },
-        { label: 'Audio', value: 'Audio' },
-        { label: 'Text', value: 'Text' }
-    ]
-    const validationSchema = Yup.object().shape({
-        MediaTitle: Yup.string().min(2, "Too Short!").max(50, "Too Long!").required("Please enter Media Title"),
-        Description: Yup.string().min(2, "Too Short!").max(250, "Too Long!").required("Please enter Description"),
-        MediaType: Yup.string().min(2, "Too Short!").max(50, "Too Long!").required("Please enter Media Type"),
-    });
-    useEffect(() => {
-        File(data[0]?.ResourceType)
-    }, []);
+  useEffect(() => {
+    if (resource) {
+      setMediaType({ label: resource.ResourceType, value: resource.ResourceType });
+      setUrl(resource.ResourceURL);
+    }
+  }, [resource]);
 
-    const imageUploading = useSelector(selectIsLoading);
+  const validationSchema = Yup.object().shape({
+    MediaTitle: Yup.string().min(2, "Too Short!").max(100, "Too Long!").required("Required"),
+    Description: Yup.string().min(2, "Too Short!").max(250, "Too Long!").required("Required"),
+    MediaType: Yup.string().required("Required"),
+  });
 
-    const onSubmit = async (values) => {
-
-        const data = {
-            "ResourceTitle": values.MediaTitle,
-            "ResourceDescription": values.Description,
-            "ResourceType": values.MediaType,
-            "ResourceURL": values.Upload == "" ? url : values.Upload,
-            "Status": 1
-        }
-
-        const valueToSend = {
-            data,
-            FreeResourceID: id
-        }
-        dispatch(UpdateFreeResources(valueToSend))
+  const onSubmit = (values) => {
+    const payload = {
+      ResourceTitle: values.MediaTitle,
+      ResourceDescription: values.Description,
+      ResourceType: values.MediaType,
+      ResourceURL: values.Upload || resource?.ResourceURL,
+      Status: 1,
     };
+    dispatch(UpdateFreeResources({ data: payload, FreeResourceID: resource?.FreeResourceID }));
+  };
 
-    const File = (fileType) => {
-        if (fileType == "Image") {
-            setFileType([".jpeg", ".jpg", ".png", ".gif"])
-        }
-        if (fileType == "Audio") {
-            setFileType([".mp3"])
-        }
-        if (fileType == "Video") {
-            setFileType([".mp4"])
-        }
-    };
+  if (!resource) return null;
 
-    const uploadMedia = async (Files, setFieldValue) => {
-        if (Files.length > 0) {
-            let formData = new FormData();
-            formData.append("imageFile", Files[0]);
-            try {
-                const originalPromiseResult = await dispatch(uploadImage(formData)).unwrap();
-                const filename = originalPromiseResult.split("/").pop();
-                const nonSpaceName = filename.indexOf("%20") >= 0 ? filename.replace(/%20/g, " ") : filename;
-                if (setFieldValue) {
-                    setFieldValue("Upload", originalPromiseResult);
-                }
-            } catch (err) {
-                console.log(err);
-            }
-        }
-    };
+  return (
+    <Formik
+      initialValues={{
+        MediaTitle: resource.ResourceTitle || "",
+        Description: resource.ResourceDescription || "",
+        MediaType: resource.ResourceType || "",
+        Upload: "",
+      }}
+      validationSchema={validationSchema}
+      onSubmit={onSubmit}
+      enableReinitialize
+    >
+      {({ errors, touched, handleSubmit, setFieldValue }) => (
+        <div className="resource-detail-layout">
 
-    return (
-        <>
-            <Formik initialValues={{
-                MediaTitle: data[0]?.ResourceTitle,
-                Description: data[0]?.ResourceDescription,
-                MediaType: data[0]?.ResourceType,
-                Upload: ""
+          {/* ── Media Preview Card ── */}
+          <Card className="resource-media-card mb-3">
+            <CardBody>
+              <div className="resource-media-header mb-3">
+                <div>
+                  <h5 className="mb-1">{resource.ResourceTitle}</h5>
+                  <p className="text-muted mb-0" style={{ fontSize: "13px" }}>
+                    {resource.ResourceDescription}
+                  </p>
+                </div>
+                <Badge color={typeBadgeColor[resource.ResourceType] || "secondary"}>
+                  {resource.ResourceType}
+                </Badge>
+              </div>
 
-            }} validationSchema={validationSchema} onSubmit={onSubmit} enableReinitialize={true}>
-                {({ touched, errors, handleSubmit, resetForm, isSubmitting, setFieldValue, values }) => (
-                    <div >
-                        <div>
-                            <div className='mb-4'>
-                                <Configurations url={data[0]?.ResourceURL} type={data[0]?.ResourceType} />
-                                <div className='mb-4 form-group'>
-                                    <Label className='form-label required' htmlFor='Department'>
-                                        Media Type
-                                    </Label>
-                                    <Field
-                                        component={Select}
-                                        options={options}
-                                        id='MediaType'
-                                        name='MediaType'
-                                        placeholder='Select'
-                                        value={MediaType}
-                                        isDisabled={true}
-                                        isSearchable={true}
-                                        onChange={(MediaType) => {
-                                            setMediaType({ label: MediaType.value, value: MediaType.value });
-                                            // File(MediaType.value);
-                                            setFieldValue("MediaType", MediaType.value);
-                                        }}
-                                        styles={{
-                                            control: (styles) => ({ ...styles, borderColor: " #e8eaed;", borderRadius: "0.375rem" }),
-                                        }}
-                                    />
-                                    {errors.MediaType && touched.MediaType ? <ErrorMessage className='text-danger small' name='MediaType' component='div' /> : null}
-                                </div>
-                            </div>
-                            <div className='mb-4 form-group'>
-                                <Label className='form-label required' htmlFor='skill-name'>
-                                    Media Title
-                                </Label>
-                                <Field
-                                    type='text'
-                                    name='MediaTitle'
-                                    id='skill-name'
-                                    disabled={!IsEdit}
-                                    placeholder='Enter Media Title'
-                                    className='form-control'
-                                />
-                                {errors.MediaTitle && touched.MediaTitle ? <ErrorMessage className='text-danger small' name='MediaTitle' component='div' /> : null}
-                            </div>
-                            <div className='mb-4 form-group'>
-                                <Label className='form-label required' htmlFor='skill-name'>
-                                    Description
-                                </Label>
-                                <Field
-                                    type='text'
-                                    name='Description'
-                                    disabled={!IsEdit}
-                                    placeholder='Enter Description'
-                                    className='form-control'
-                                />
-                                {errors.Description && touched.Description ? <ErrorMessage className='text-danger small' name='Description' component='div' /> : null}
-                            </div>
-                            {IsEdit && data[0]?.ResourceType != "Text" &&
-                                <div className='mb-4 form-group'>
-                                    <Label className='form-label required' htmlFor='skill-name'>
-                                        File Upload
-                                    </Label>
-                                    <DropZoneForm multiFiles={false} fileData={uploadMedia} isUploading={imageUploading} accept={FileType} setFieldValue={setFieldValue} />
-                                    {errors.Upload && touched.Upload ? <ErrorMessage className='text-danger small' name='Upload' component='div' /> : null}
-                                </div>}
-                            {IsEdit ? <><Button type='submit' color='primary' disabled={imageUploading || loading} className='btn-md m-1 waves-effect waves-light action_btn' onClick={handleSubmit} >
-                                Submit
-                            </Button></> : <></>}
-                        </div>
-                    </div>
+              <Configurations url={url} type={resource.ResourceType} />
+            </CardBody>
+          </Card>
+
+          {/* ── Edit Form (only in edit mode) ── */}
+          {IsEdit && (
+            <Card className="mb-3">
+              <CardBody>
+                <h6 className="mb-3">Edit Resource Details</h6>
+
+                <div className="mb-3">
+                  <Label className="form-label required">Media Type</Label>
+                  <Select
+                    options={typeOptions}
+                    value={mediaType}
+                    isDisabled
+                    styles={{ control: (s) => ({ ...s, borderColor: "#e8eaed", borderRadius: "0.375rem" }) }}
+                  />
+                </div>
+
+                <div className="mb-3">
+                  <Label className="form-label required">Media Title</Label>
+                  <Field name="MediaTitle" type="text" className="form-control" placeholder="Enter title" />
+                  {errors.MediaTitle && touched.MediaTitle && (
+                    <ErrorMessage name="MediaTitle" component="div" className="text-danger small" />
+                  )}
+                </div>
+
+                <div className="mb-3">
+                  <Label className="form-label required">Description</Label>
+                  <Field name="Description" as="textarea" rows={3} className="form-control" placeholder="Enter description" />
+                  {errors.Description && touched.Description && (
+                    <ErrorMessage name="Description" component="div" className="text-danger small" />
+                  )}
+                </div>
+
+                {resource.ResourceType !== "Text" && (
+                  <div className="mb-3">
+                    <Label className="form-label">Replace File</Label>
+                    <DropZoneForm
+                      multiFiles={false}
+                      fileData={async (files, setFV) => {
+                        if (!files.length) return;
+                        const fd = new FormData();
+                        fd.append("imageFile", files[0]);
+                        try {
+                          const res = await dispatch(uploadImage(fd)).unwrap();
+                          setFV("Upload", res);
+                          setUrl(res);
+                        } catch (e) { console.error(e); }
+                      }}
+                      isUploading={imageUploading}
+                      accept={fileAcceptMap[resource.ResourceType] || null}
+                      setFieldValue={setFieldValue}
+                    />
+                  </div>
                 )}
-            </Formik>
-        </>
-    );
+
+                <div style={{ display: "flex", gap: "8px" }}>
+                  <Button
+                    type="submit"
+                    color="primary"
+                    className="btn-md waves-effect waves-light action_btn"
+                    disabled={imageUploading || loading}
+                    onClick={handleSubmit}
+                  >
+                    {loading ? "Saving…" : "Save Changes"}
+                  </Button>
+                </div>
+              </CardBody>
+            </Card>
+          )}
+
+          <style jsx>{`
+            .resource-detail-layout {
+              padding: 0 4px;
+            }
+            .resource-media-card {
+              border-radius: 12px;
+            }
+            .resource-media-header {
+              display: flex;
+              align-items: flex-start;
+              justify-content: space-between;
+              gap: 12px;
+            }
+            @media (max-width: 576px) {
+              .resource-media-header {
+                flex-direction: column;
+              }
+            }
+          `}</style>
+        </div>
+      )}
+    </Formik>
+  );
 }
+
 export default ViewResource;
