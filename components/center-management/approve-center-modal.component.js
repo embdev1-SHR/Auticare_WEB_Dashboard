@@ -1,203 +1,95 @@
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  Modal, ModalHeader, ModalBody, ModalFooter,
-  Button, Row, Col, Label,
-} from "reactstrap";
-import { Formik, Form, Field, ErrorMessage } from "formik";
-import * as yup from "yup";
+import { Modal, ModalHeader, ModalBody, ModalFooter, Button, Label } from "reactstrap";
 import Select from "react-select";
-import PhoneInput from "react-phone-input-2";
-import "react-phone-input-2/lib/style.css";
-import { approveCenter, selectIsPendingLoading } from "../../store/slice/center.slice";
+import Alert from "../shared/alert";
+import { approveCenter, rejectCenter, selectIsPendingLoading } from "../../store/slice/center.slice";
 import { selectClientList } from "../../store/slice/client.slice";
-import { salutationOption } from "../content-management/common.content";
-
-const validationSchema = yup.object({
-  CenterName: yup.string().required("Center name is required"),
-  ClientID: yup.number().required("Client is required").typeError("Please select a client"),
-  CenterType: yup.string().required("Center type is required"),
-  CenterHeadName: yup.string().required("Center head name is required"),
-  CenterHeadDesignation: yup.string().required("Designation is required"),
-  CenterHeadEmailId: yup.string().email("Invalid email").required("Email is required"),
-  CenterHeadPhone: yup.string().required("Phone is required"),
-});
 
 function ApproveCenterModal({ pendingCenter, onClose }) {
   const dispatch = useDispatch();
   const isLoading = useSelector(selectIsPendingLoading);
   const clientList = useSelector(selectClientList);
-  const [countryCode] = useState("in");
+  const [clientID, setClientID] = useState(null);
+  const [clientError, setClientError] = useState("");
+  const [showRejectAlert, setShowRejectAlert] = useState(false);
 
   const clientOptions = (clientList || []).map((c) => ({
     value: c.ClientID,
     label: c.ClientName,
   }));
 
-  const initialValues = {
-    CenterName: pendingCenter.CenterName || "",
-    ClientID: "",
-    CenterType: "Association",
-    CenterHeadSalutation: "",
-    CenterHeadName: "",
-    CenterHeadDesignation: "",
-    CenterHeadEmailId: "",
-    CenterHeadPhone: "",
-  };
-
-  const handleSubmit = async (values) => {
-    await dispatch(approveCenter({ ...values, UserID: pendingCenter.UserID }));
+  const handleApprove = async () => {
+    if (!clientID) {
+      setClientError("Please select a client to assign this center to.");
+      return;
+    }
+    setClientError("");
+    await dispatch(approveCenter({ UserID: pendingCenter.UserID, ClientID: clientID }));
     onClose();
   };
 
+  const handleRejectConfirm = async () => {
+    setShowRejectAlert(false);
+    await dispatch(rejectCenter(pendingCenter.UserID));
+    onClose();
+  };
+
+  const field = (label, value) => (
+    <div style={{ display: "flex", marginBottom: 10 }}>
+      <span style={{ minWidth: 140, fontWeight: 600, color: "#555", fontSize: 13 }}>{label}</span>
+      <span style={{ color: "#1e1e2d", fontSize: 13 }}>{value || <span style={{ color: "#aaa" }}>—</span>}</span>
+    </div>
+  );
+
   return (
-    <Modal isOpen toggle={onClose} size="lg" scrollable>
-      <ModalHeader toggle={onClose}>
-        Approve Center Registration
-      </ModalHeader>
-      <Formik
-        initialValues={initialValues}
-        validationSchema={validationSchema}
-        onSubmit={handleSubmit}
-      >
-        {({ errors, touched, setFieldValue, handleBlur, values }) => (
-          <Form>
-            <ModalBody>
-              <div className="mb-3 p-3" style={{ background: "#f8f9fa", borderRadius: 8, fontSize: 13 }}>
-                <strong>Signup Info</strong> — Email: {pendingCenter.EmailId}
-                {pendingCenter.Phone ? ` · Phone: ${pendingCenter.Phone}` : ""}
-                {pendingCenter.Create_TS
-                  ? ` · Submitted: ${new Date(pendingCenter.Create_TS).toLocaleDateString()}`
-                  : ""}
-              </div>
+    <>
+      <Modal isOpen toggle={onClose} size="md">
+        <ModalHeader toggle={onClose}>Center Registration Details</ModalHeader>
+        <ModalBody>
+          <div style={{ background: "#f8f9fa", borderRadius: 8, padding: "16px 20px", marginBottom: 20 }}>
+            {field("Center Name", pendingCenter.CenterName)}
+            {field("Email", pendingCenter.EmailId)}
+            {field("Phone", pendingCenter.Phone)}
+            {field("Address", [pendingCenter.AddressLine1, pendingCenter.City, pendingCenter.State, pendingCenter.Country].filter(Boolean).join(", "))}
+            {field("Registered On", pendingCenter.Create_TS ? new Date(pendingCenter.Create_TS).toLocaleString() : null)}
+          </div>
 
-              <h6 className="mb-3">Center Details</h6>
-              <Row>
-                <Col lg="6">
-                  <div className="mb-4">
-                    <Label className="form-label required">Center Name</Label>
-                    <Field name="CenterName" className="form-control" placeholder="Center name" />
-                    {errors.CenterName && touched.CenterName && (
-                      <ErrorMessage className="text-danger small" name="CenterName" component="div" />
-                    )}
-                  </div>
-                </Col>
-                <Col lg="6">
-                  <div className="mb-4">
-                    <Label className="form-label required">Client</Label>
-                    <Select
-                      options={clientOptions}
-                      placeholder="Select client"
-                      onChange={(opt) => setFieldValue("ClientID", opt ? opt.value : "")}
-                      styles={{
-                        control: (s) => ({ ...s, borderColor: "#e8eaed", borderRadius: "0.375rem" }),
-                      }}
-                    />
-                    {errors.ClientID && touched.ClientID && (
-                      <div className="text-danger small">{errors.ClientID}</div>
-                    )}
-                  </div>
-                </Col>
-              </Row>
-              <Row>
-                <Col lg="6">
-                  <div className="mb-4">
-                    <Label className="form-label required">Center Type</Label>
-                    <div className="d-flex gap-4 mt-1">
-                      <label className="d-flex align-items-center gap-2" style={{ cursor: "pointer" }}>
-                        <Field type="radio" name="CenterType" value="Association" />
-                        <span>Association</span>
-                      </label>
-                      <label className="d-flex align-items-center gap-2" style={{ cursor: "pointer" }}>
-                        <Field type="radio" name="CenterType" value="Partner" />
-                        <span>Partner</span>
-                      </label>
-                    </div>
-                    {errors.CenterType && touched.CenterType && (
-                      <div className="text-danger small">{errors.CenterType}</div>
-                    )}
-                  </div>
-                </Col>
-              </Row>
+          <div>
+            <Label className="form-label required" style={{ fontWeight: 600 }}>
+              Assign to Client <span className="text-danger">*</span>
+            </Label>
+            <Select
+              options={clientOptions}
+              placeholder="Select client..."
+              onChange={(opt) => { setClientID(opt ? opt.value : null); setClientError(""); }}
+              styles={{ control: (s) => ({ ...s, borderColor: clientError ? "#dc3545" : "#e8eaed", borderRadius: "0.375rem" }) }}
+            />
+            {clientError && <div className="text-danger small mt-1">{clientError}</div>}
+          </div>
+        </ModalBody>
+        <ModalFooter className="justify-content-between">
+          <Button color="danger" outline onClick={() => setShowRejectAlert(true)} disabled={isLoading}>
+            Reject Registration
+          </Button>
+          <div className="d-flex gap-2">
+            <Button color="secondary" outline onClick={onClose} disabled={isLoading}>
+              Cancel
+            </Button>
+            <Button color="success" onClick={handleApprove} disabled={isLoading}>
+              {isLoading ? "Approving…" : "Approve & Activate"}
+            </Button>
+          </div>
+        </ModalFooter>
+      </Modal>
 
-              <h6 className="mb-3 mt-2">Center Head Details</h6>
-              <Row>
-                <Col lg="6">
-                  <div className="mb-4">
-                    <Label className="form-label">Salutation</Label>
-                    <Select
-                      options={salutationOption}
-                      placeholder="Select salutation"
-                      onChange={(opt) => setFieldValue("CenterHeadSalutation", opt ? opt.value : "")}
-                      styles={{
-                        control: (s) => ({ ...s, borderColor: "#e8eaed", borderRadius: "0.375rem" }),
-                      }}
-                    />
-                  </div>
-                </Col>
-                <Col lg="6">
-                  <div className="mb-4">
-                    <Label className="form-label required">Name</Label>
-                    <Field name="CenterHeadName" className="form-control" placeholder="Center head name" />
-                    {errors.CenterHeadName && touched.CenterHeadName && (
-                      <ErrorMessage className="text-danger small" name="CenterHeadName" component="div" />
-                    )}
-                  </div>
-                </Col>
-              </Row>
-              <Row>
-                <Col lg="6">
-                  <div className="mb-4">
-                    <Label className="form-label required">Designation</Label>
-                    <Field name="CenterHeadDesignation" className="form-control" placeholder="Designation" />
-                    {errors.CenterHeadDesignation && touched.CenterHeadDesignation && (
-                      <ErrorMessage className="text-danger small" name="CenterHeadDesignation" component="div" />
-                    )}
-                  </div>
-                </Col>
-                <Col lg="6">
-                  <div className="mb-4">
-                    <Label className="form-label required">Email</Label>
-                    <Field name="CenterHeadEmailId" type="email" className="form-control" placeholder="Email address" />
-                    {errors.CenterHeadEmailId && touched.CenterHeadEmailId && (
-                      <ErrorMessage className="text-danger small" name="CenterHeadEmailId" component="div" />
-                    )}
-                  </div>
-                </Col>
-              </Row>
-              <Row>
-                <Col lg="6">
-                  <div className="mb-4">
-                    <Label className="form-label required">Phone</Label>
-                    <PhoneInput
-                      country={countryCode}
-                      value={values.CenterHeadPhone}
-                      onChange={(value) => setFieldValue("CenterHeadPhone", value)}
-                      onBlur={handleBlur}
-                      inputClass="mr-auto border-0"
-                      buttonClass="mr-auto border-0 bg-transparent"
-                      containerClass="form-control d-flex align-items-center"
-                      inputProps={{ id: "CenterHeadPhone" }}
-                    />
-                    {errors.CenterHeadPhone && touched.CenterHeadPhone && (
-                      <div className="text-danger small">{errors.CenterHeadPhone}</div>
-                    )}
-                  </div>
-                </Col>
-              </Row>
-            </ModalBody>
-            <ModalFooter>
-              <Button color="secondary" outline onClick={onClose} disabled={isLoading}>
-                Cancel
-              </Button>
-              <Button color="success" type="submit" disabled={isLoading}>
-                {isLoading ? "Approving..." : "Approve & Activate"}
-              </Button>
-            </ModalFooter>
-          </Form>
-        )}
-      </Formik>
-    </Modal>
+      {showRejectAlert && (
+        <Alert
+          onHandleConfirm={handleRejectConfirm}
+          onDelete={() => setShowRejectAlert(false)}
+        />
+      )}
+    </>
   );
 }
 

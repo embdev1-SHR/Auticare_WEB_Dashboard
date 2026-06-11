@@ -1,29 +1,15 @@
 import { useMemo, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { Button, Badge } from "reactstrap";
+import { useSelector } from "react-redux";
+import { Badge, Button } from "reactstrap";
 import ReactTable from "../shared/react-table";
-import Alert from "../shared/alert";
-import {
-  selectPendingCenterList,
-  selectIsPendingLoading,
-  rejectCenter,
-} from "../../store/slice/center.slice";
+import { selectPendingCenterList, selectIsPendingLoading } from "../../store/slice/center.slice";
 import ApproveCenterModal from "./approve-center-modal.component";
 import Loader from "../shared/loader";
 
 function PendingCenterListing() {
-  const dispatch = useDispatch();
   const pendingCenters = useSelector(selectPendingCenterList);
   const isLoading = useSelector(selectIsPendingLoading);
-  const [approveTarget, setApproveTarget] = useState(null);
-  const [rejectTarget, setRejectTarget] = useState(null);
-
-  const handleRejectConfirm = () => {
-    if (rejectTarget) {
-      dispatch(rejectCenter(rejectTarget.UserID));
-    }
-    setRejectTarget(null);
-  };
+  const [selected, setSelected] = useState(null);
 
   const data = useMemo(() => pendingCenters || [], [pendingCenters]);
 
@@ -48,7 +34,7 @@ function PendingCenterListing() {
         Cell: ({ value }) => value || <span className="text-muted">—</span>,
       },
       {
-        Header: "Registration Date",
+        Header: "Registered On",
         accessor: "Create_TS",
         Cell: ({ value }) =>
           value ? new Date(value).toLocaleDateString() : <span className="text-muted">—</span>,
@@ -57,37 +43,21 @@ function PendingCenterListing() {
         Header: "Status",
         id: "status",
         accessor: () => (
-          <Badge color="warning" pill>
-            Pending
-          </Badge>
+          <Badge color="warning" pill>Pending</Badge>
         ),
       },
       {
-        Header: "Actions",
-        id: "Actions",
+        Header: "Action",
+        id: "action",
         accessor: (row) => row,
         Cell: ({ value: row }) => (
-          <div className="d-flex gap-2">
-            <Button
-              color="success"
-              size="sm"
-              onClick={() => setApproveTarget(row)}
-            >
-              Approve
-            </Button>
-            <Button
-              color="danger"
-              size="sm"
-              outline
-              onClick={() => setRejectTarget(row)}
-            >
-              Reject
-            </Button>
-          </div>
+          <Button color="primary" size="sm" outline onClick={() => setSelected(row)}>
+            Review
+          </Button>
         ),
       },
     ],
-    [pendingCenters]
+    []
   );
 
   if (isLoading) return <Loader />;
@@ -104,16 +74,10 @@ function PendingCenterListing() {
   return (
     <>
       <ReactTable columns={columns} data={data} />
-      {approveTarget && (
+      {selected && (
         <ApproveCenterModal
-          pendingCenter={approveTarget}
-          onClose={() => setApproveTarget(null)}
-        />
-      )}
-      {rejectTarget && (
-        <Alert
-          onHandleConfirm={handleRejectConfirm}
-          onDelete={() => setRejectTarget(null)}
+          pendingCenter={selected}
+          onClose={() => setSelected(null)}
         />
       )}
     </>
