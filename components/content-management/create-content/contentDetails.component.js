@@ -159,6 +159,33 @@ const ContentDetailsComponent = () => {
             <Configurations setContentConfiguration={setContentConfiguration} fileFormat={content ? content.FileUploadURL : ""} />
           ) : (
             <>
+              {content.FileUploadURL && (
+                <div className='card mb-4' style={{ border: '1px solid #e9ecef', borderRadius: 10, overflow: 'hidden' }}>
+                  <div className='card-header py-2 px-3' style={{ background: '#f8f9fa', fontWeight: 600, fontSize: 14 }}>
+                    Media Preview
+                  </div>
+                  <div className='card-body p-3'>
+                    {(content.ContentCategory === "Video" || content.ContentCategory === "VR") && (
+                      <div style={{ position: 'relative', borderRadius: 8, overflow: 'hidden', background: '#000', aspectRatio: '16/9' }}>
+                        <video
+                          src={content.FileUploadURL}
+                          controls
+                          controlsList='nodownload'
+                          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'contain' }}
+                        />
+                      </div>
+                    )}
+                    {content.ContentCategory === "Audio" && (
+                      <audio src={content.FileUploadURL} controls style={{ width: '100%' }} />
+                    )}
+                    {content.ContentCategory === "Image" && (
+                      <div style={{ display: 'flex', justifyContent: 'center' }}>
+                        <img src={content.FileUploadURL} alt='Content preview' style={{ maxWidth: '100%', maxHeight: 480, borderRadius: 8 }} />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
               <fieldset disabled={ContentIsEdit ? false : true}>
                 <div className='mb-4'>
                   <Label className='form-label required' htmlFor='activity-name'>
