@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { Button, Input, Badge } from "reactstrap";
 
-const ReactPlayer = dynamic(() => import("react-player/lazy"), { ssr: false });
+const ReactPlayer = dynamic(() => import("react-player"), { ssr: false });
 
 const formatTime = (seconds) => {
   const s = Math.max(0, Math.floor(seconds));
