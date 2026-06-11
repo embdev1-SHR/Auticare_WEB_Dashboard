@@ -33,15 +33,15 @@ function ViewResource(ResourceID) {
 
   const resource = data[0];
 
-  const [mediaType, setMediaType] = useState(null);
-  const [url, setUrl] = useState(null);
+  const [mediaType, setMediaType] = useState(resource ? { label: resource.ResourceType, value: resource.ResourceType } : null);
+  const [url, setUrl] = useState(resource?.ResourceURL ?? null);
 
   useEffect(() => {
     if (resource) {
       setMediaType({ label: resource.ResourceType, value: resource.ResourceType });
       setUrl(resource.ResourceURL);
     }
-  }, [resource]);
+  }, [resource?.FreeResourceID]);
 
   const validationSchema = Yup.object().shape({
     MediaTitle: Yup.string().min(2, "Too Short!").max(100, "Too Long!").required("Required"),

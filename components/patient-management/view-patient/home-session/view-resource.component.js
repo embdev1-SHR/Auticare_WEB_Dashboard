@@ -47,9 +47,9 @@ function ViewResource({ HomeSessionID, PatientId }) {
 
   const session = HomeSessiondata?.find((e) => String(e.HomeSessionID) === String(HomeSessionID));
 
-  const [mediaType, setMediaType] = useState(null);
-  const [url, setUrl] = useState(null);
-  const [fileAccept, setFileAccept] = useState(null);
+  const [mediaType, setMediaType] = useState(session ? { label: session.ResourceType, value: session.ResourceType } : null);
+  const [url, setUrl] = useState(session?.ResourceURL ?? null);
+  const [fileAccept, setFileAccept] = useState(session ? fileAcceptMap[session.ResourceType] || null : null);
   const [isAlertOpen, setIsAlertOpen] = useState(false);
 
   useEffect(() => {
@@ -58,7 +58,7 @@ function ViewResource({ HomeSessionID, PatientId }) {
       setUrl(session.ResourceURL);
       setFileAccept(fileAcceptMap[session.ResourceType] || null);
     }
-  }, [session]);
+  }, [session?.HomeSessionID]);
 
   const validationSchema = Yup.object().shape({
     MediaTitle: Yup.string().min(2, "Too Short!").max(100, "Too Long!").required("Required"),
