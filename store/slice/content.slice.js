@@ -56,13 +56,13 @@ export const tutorialLink = createAsyncThunk("content/tutorialLink", async (data
     return error;
   }
 });
-export const fetchAllContents = createAsyncThunk("content/fetchAllContents", async (thunkApi) => {
+export const fetchAllContents = createAsyncThunk("content/fetchAllContents", async (_, thunkApi) => {
   try {
     const { data } = await fetchAllContentsService();
     return data.results.data;
   } catch (error) {
-    const message = error.responce.data.message;
-    return thunkApi.rejectWithValue(message);
+    console.error(error);
+    return thunkApi.rejectWithValue(error?.response?.data?.message || "Failed to fetch contents");
   }
 });
 export const createContent = createAsyncThunk("content/createContent", async (data, thunkApi) => {
@@ -228,8 +228,10 @@ export const contentSlice = createSlice({
 
       .addCase(fetchAllContents.fulfilled, (state, action) => {
         state.isLoading = false;
-
         state.contents = action.payload;
+      })
+      .addCase(fetchAllContents.rejected, (state) => {
+        state.isLoading = false;
       })
       .addCase(tutorialLink.pending, (state, action) => {
         state.isLoading = true;
@@ -310,6 +312,9 @@ export const contentSlice = createSlice({
       .addCase(ContentMappingList.fulfilled, (state, action) => {
         state.isLoading = false;
         state.CondentMapping = action.payload;
+      })
+      .addCase(ContentMappingList.rejected, (state) => {
+        state.isLoading = false;
       })
 
       .addCase(createContentMediaData.pending, (state) => {
