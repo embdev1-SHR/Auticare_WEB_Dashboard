@@ -1,8 +1,5 @@
-import { useRef, useState } from "react";
-import dynamic from "next/dynamic";
+import { useRef, useState, useEffect } from "react";
 import { Button, Input, Badge } from "reactstrap";
-
-const ReactPlayer = dynamic(() => import("react-player"), { ssr: false });
 
 const formatTime = (seconds) => {
   const s = Math.max(0, Math.floor(seconds));
@@ -22,7 +19,7 @@ const parseAnnotations = (overlays) =>
     .sort((a, b) => a.timestamp - b.timestamp);
 
 export const VideoPlayer = ({ file_src, overlays }) => {
-  const playerRef = useRef(null);
+  const videoRef = useRef(null);
   const [annotations, setAnnotations] = useState(() => parseAnnotations(overlays));
   const [currentTime, setCurrentTime] = useState(0);
   const [showAddForm, setShowAddForm] = useState(false);
@@ -30,7 +27,13 @@ export const VideoPlayer = ({ file_src, overlays }) => {
   const [editingId, setEditingId] = useState(null);
   const [editText, setEditText] = useState("");
 
-  const handleProgress = ({ playedSeconds }) => setCurrentTime(playedSeconds);
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    const onTimeUpdate = () => setCurrentTime(video.currentTime);
+    video.addEventListener("timeupdate", onTimeUpdate);
+    return () => video.removeEventListener("timeupdate", onTimeUpdate);
+  }, []);
 
   const addAnnotation = () => {
     if (!newText.trim()) return;
@@ -50,22 +53,24 @@ export const VideoPlayer = ({ file_src, overlays }) => {
     setEditingId(null);
   };
 
-  const seekTo = (ts) => playerRef.current?.seekTo(ts, "seconds");
+  const seekTo = (ts) => {
+    if (videoRef.current) {
+      videoRef.current.currentTime = ts;
+      videoRef.current.play().catch(() => {});
+    }
+  };
 
   return (
     <div className="video-annotation-layout">
       {/* ── Left: player + add-annotation bar ── */}
       <div className="video-player-col">
         <div className="player-wrapper">
-          <ReactPlayer
-            ref={playerRef}
-            url={file_src}
+          <video
+            ref={videoRef}
+            src={file_src}
             controls
-            width="100%"
-            height="100%"
-            onProgress={handleProgress}
-            progressInterval={500}
-            config={{ file: { attributes: { controlsList: "nodownload" } } }}
+            style={{ width: "100%", height: "100%", display: "block" }}
+            controlsList="nodownload"
           />
         </div>
 
@@ -185,9 +190,12 @@ export const VideoPlayer = ({ file_src, overlays }) => {
           background: #000;
           aspect-ratio: 16/9;
         }
-        .player-wrapper > div {
-          position: absolute !important;
+        .player-wrapper video {
+          position: absolute;
           inset: 0;
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
         }
         .annotation-bar {
           margin-top: 12px;
