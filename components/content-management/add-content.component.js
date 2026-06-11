@@ -9,8 +9,9 @@ import { selectSetModalOpenState, setModalOpen } from "../../store/slice/layout.
 import { selectSkillList } from "../../store/slice/skills.slice";
 import { selectTherapiesList } from "../../store/slice/therapies.slice";
 
-import { selectUploadImageData, uploadImage } from "../../store/slice/common.slice";
+import { selectIsLoading, uploadImage } from "../../store/slice/common.slice";
 import CloseSweetAlert from "../shared/close-sweetalert";
+import DropZoneForm from "../shared/dropzoneform";
 import { ContentTypeoptions, contentSchema } from "./common.content";
 import { selectUserData } from "../../store/slice/auth.slice";
 import { ToastNotification } from "../shared/toast";
@@ -20,7 +21,7 @@ function AddContent() {
   const setModalOpenState = useSelector(selectSetModalOpenState);
   const loading = useSelector(contentIsLoading);
   const UserData = useSelector(selectUserData);
-  const uploadImageData = useSelector(selectUploadImageData);
+  const imageUploading = useSelector(selectIsLoading);
   const selectskills = useSelector(selectSkillList);
 
   const setModalOpenStte = useSelector(selectTherapiesList);
@@ -41,7 +42,14 @@ function AddContent() {
     return { value: skill.SkillID, label: skill.SkillName };
   });
 
-  const [fileLoading, setFileLoading] = useState(false);
+  const [selectedContentType, setSelectedContentType] = useState("");
+
+  const fileAcceptMap = {
+    VR: [".mp4"],
+    Video: [".mp4"],
+    Audio: [".mp3"],
+    Image: [".jpeg", ".jpg", ".png", ".gif"],
+  };
   const tog_standard = () => {
     if (UserData.RoleName != "SuperAdmin") {
       if (SelectContentByType.length >= UserData.SubscriptionPlan[0].NumberofCustomContents) {
@@ -64,6 +72,7 @@ function AddContent() {
       ContentActivityName: values.ContentActivityName,
       ContentActivityDescription: values.ContentActivityDescription,
       ContentCategory: values.ContentType,
+      FileUploadURL: values.FileUploadURL || null,
       TherapyIDs: values.TherapyIDs.length == 0 ? undefined : values.TherapyIDs,
       SkillIDs: values.SkillsIds.length == 0 ? undefined : values.SkillsIds,
     };
@@ -90,6 +99,7 @@ function AddContent() {
           ContentActivityName: "",
           ContentActivityDescription: "",
           ContentType: "",
+          FileUploadURL: "",
           TherapyIDs: [],
           SkillsIds: [],
         }}
@@ -147,11 +157,38 @@ function AddContent() {
                   classNamePrefix='form-control'
                   onChange={(content) => {
                     setFieldValue("ContentType", content.value);
+                    setSelectedContentType(content.value);
+                    setFieldValue("FileUploadURL", "");
                   }}
                   styles={selectStyles}
                 />
                 {errors.ContentType && touched.ContentType ? <ErrorMessage className='text-danger small' name='ContentType' component='div' /> : null}
               </div>
+
+              {selectedContentType && selectedContentType !== "Text" && (
+                <div className='mb-4'>
+                  <Label className='form-label' htmlFor='file-upload'>
+                    File Upload
+                  </Label>
+                  <DropZoneForm
+                    multiFiles={false}
+                    accept={fileAcceptMap[selectedContentType] || [".mp4", ".mp3", ".jpeg", ".jpg", ".png"]}
+                    isUploading={imageUploading}
+                    setFieldValue={setFieldValue}
+                    fileData={async (files, setFV) => {
+                      if (!files.length) return;
+                      const fd = new FormData();
+                      fd.append("imageFile", files[0]);
+                      try {
+                        const url = await dispatch(uploadImage(fd)).unwrap();
+                        setFV("FileUploadURL", url);
+                      } catch (e) {
+                        console.error(e);
+                      }
+                    }}
+                  />
+                </div>
+              )}
 
               <div className='mb-4'>
                 <Label className='form-label ' htmlFor='Therapy-Method'>
