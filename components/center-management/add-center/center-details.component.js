@@ -344,6 +344,27 @@ function CenterDetails({ activeTab }) {
       <Row>
         <Col lg="6">
           <div className="mb-4">
+            <Label className="form-label required" htmlFor="Password">Password</Label>
+            <Field type="password" name="Password" id="Password" placeholder="Enter password (min 6 chars)" className="form-control" />
+            {errors.Password && touched.Password ? (
+              <ErrorMessage className="text-danger small" name="Password" component="div" />
+            ) : null}
+          </div>
+        </Col>
+        <Col lg="6">
+          <div className="mb-4">
+            <Label className="form-label required" htmlFor="ConfirmPassword">Confirm Password</Label>
+            <Field type="password" name="ConfirmPassword" id="ConfirmPassword" placeholder="Re-enter password" className="form-control" />
+            {errors.ConfirmPassword && touched.ConfirmPassword ? (
+              <ErrorMessage className="text-danger small" name="ConfirmPassword" component="div" />
+            ) : null}
+          </div>
+        </Col>
+      </Row>
+
+      <Row>
+        <Col lg="6">
+          <div className="mb-4">
             <Label className="form-label required" htmlFor="pincode-input1">
               Pincode
             </Label>

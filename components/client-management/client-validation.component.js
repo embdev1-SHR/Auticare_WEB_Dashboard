@@ -43,6 +43,8 @@ export const renderValidation = (tab) => {
           .nullable(),
         ClientType: yup.string().max(100, "Too Long!").matches("").required("Please select a client type"),
         OrganizationType: yup.string().max(100, "Too Long!").required("Please select a organization type"),
+        Password: yup.string().min(6, "Password must be at least 6 characters").required("Please enter a password"),
+        ConfirmPassword: yup.string().oneOf([yup.ref("Password"), null], "Passwords must match").required("Please confirm your password"),
       });
     case 2:
       return yup.object().shape({

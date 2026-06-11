@@ -85,7 +85,8 @@ export const therapistValidation = (
           }),
         State: yup.string().max(100, "Too Long!").matches("").required("Please select state"),
         Country: yup.string().max(100, "Too Long!").matches("").required("Please select country"),
-        // Profile: yup.string().min(2, "Too Short!").max(100, "Too Long!").required("Required"),
+        Password: yup.string().min(6, "Password must be at least 6 characters").required("Please enter a password"),
+        ConfirmPassword: yup.string().oneOf([yup.ref("Password"), null], "Passwords must match").required("Please confirm your password"),
       });
     case 2:
       return yup.object().shape({

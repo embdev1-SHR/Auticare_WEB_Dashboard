@@ -267,6 +267,26 @@ function BasicDetails() {
         </Col>
       </Row>
       <div className='mb-4'>
+        <h6 className='mb-3'>Login Credentials</h6>
+        <Row>
+          <Col lg='6'>
+            <div className='mb-4'>
+              <Label className='form-label required' htmlFor='Password'>Password</Label>
+              <Field type='password' className='form-control' id='Password' name='Password' placeholder='Enter password (min 6 chars)' />
+              {errors.Password && touched.Password ? <ErrorMessage className='text-danger small' name='Password' component='div' /> : null}
+            </div>
+          </Col>
+          <Col lg='6'>
+            <div className='mb-4'>
+              <Label className='form-label required' htmlFor='ConfirmPassword'>Confirm Password</Label>
+              <Field type='password' className='form-control' id='ConfirmPassword' name='ConfirmPassword' placeholder='Re-enter password' />
+              {errors.ConfirmPassword && touched.ConfirmPassword ? <ErrorMessage className='text-danger small' name='ConfirmPassword' component='div' /> : null}
+            </div>
+          </Col>
+        </Row>
+      </div>
+
+      <div className='mb-4'>
         <Label className='form-label required mb-3'>Organization Type</Label>
         <div className='d-flex flex-wrap'>
           <div className='custom-control custom-radio mb-2 mr-3'>

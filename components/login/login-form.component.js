@@ -1,4 +1,5 @@
 import { ErrorMessage, Field, Form, Formik } from "formik";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
@@ -66,6 +67,12 @@ function LoginForm() {
           </div>
 
           <div className="mt-4 text-center">
+            <p className="text-muted mb-3">
+              Are you a center?{" "}
+              <Link href="/center-signup">
+                <a className="text-primary fw-medium">Register here</a>
+              </Link>
+            </p>
             <ButtonComponent className="btn btn-primary w-md waves-effect waves-light w-100" disabled={isLoading}>
               {isLoading ? (
                 <Spinner

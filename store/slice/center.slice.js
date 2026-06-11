@@ -6,6 +6,9 @@ import {
   centerDetailsService,
   searchCenterService,
   fetchAllCentersService,
+  fetchPendingCentersService,
+  approveCenterService,
+  rejectCenterService,
 } from "../../services/center.services";
 
 import { setModalOpen } from "./layout.slice";
@@ -93,6 +96,49 @@ export const SelectCenter = createAsyncThunk(
   }
 );
 
+export const fetchPendingCenters = createAsyncThunk(
+  "center/fetchPendingCenters",
+  async (_, thunkApi) => {
+    try {
+      const { data } = await fetchPendingCentersService();
+      return data.results.data;
+    } catch (error) {
+      return thunkApi.rejectWithValue(error.message);
+    }
+  }
+);
+
+export const approveCenter = createAsyncThunk(
+  "center/approveCenter",
+  async (data, thunkApi) => {
+    try {
+      const res = await approveCenterService(data);
+      ToastNotification("success", "Center approved successfully");
+      await thunkApi.dispatch(fetchPendingCenters());
+      await thunkApi.dispatch(fetchAllCenters());
+      return res.data.results.message;
+    } catch (error) {
+      ToastNotification("error", "Approval failed", error?.errors?.message || error.message);
+      return thunkApi.rejectWithValue(error.message);
+    }
+  }
+);
+
+export const rejectCenter = createAsyncThunk(
+  "center/rejectCenter",
+  async (UserID, thunkApi) => {
+    try {
+      const res = await rejectCenterService(UserID);
+      ToastNotification("success", "Registration rejected");
+      await thunkApi.dispatch(fetchPendingCenters());
+      return res.data.results.message;
+    } catch (error) {
+      ToastNotification("error", "Failed to reject registration");
+      return thunkApi.rejectWithValue(error.message);
+    }
+  }
+);
+
 export const searchCenter = createAsyncThunk(
   "center/searchCenter",
   async (CenterName, thunkApi) => {
@@ -107,6 +153,8 @@ export const searchCenter = createAsyncThunk(
 );
 const initialState = {
   centers: [],
+  pendingCenters: [],
+  isPendingLoading: false,
   selectedCenter: null,
   isLoading: false,
   centerIsEdit:
@@ -196,16 +244,33 @@ export const centerSlice = createSlice({
       })
       .addCase(searchCenter.rejected, (state, action) => {
         state.IsSearch = false;
-      });
+      })
+      .addCase(fetchPendingCenters.pending, (state) => {
+        state.isPendingLoading = true;
+      })
+      .addCase(fetchPendingCenters.fulfilled, (state, action) => {
+        state.isPendingLoading = false;
+        state.pendingCenters = action.payload;
+      })
+      .addCase(fetchPendingCenters.rejected, (state) => {
+        state.isPendingLoading = false;
+      })
+      .addCase(approveCenter.pending, (state) => { state.isPendingLoading = true; })
+      .addCase(approveCenter.fulfilled, (state) => { state.isPendingLoading = false; })
+      .addCase(approveCenter.rejected, (state) => { state.isPendingLoading = false; })
+      .addCase(rejectCenter.pending, (state) => { state.isPendingLoading = true; })
+      .addCase(rejectCenter.fulfilled, (state) => { state.isPendingLoading = false; })
+      .addCase(rejectCenter.rejected, (state) => { state.isPendingLoading = false; });
   },
 });
 export const { setCenterEdit, setCurrentCenterId } = centerSlice.actions;
 
 export const selectCenterList = (state) => state.center.centers;
 export const CenterDetailsLoading = (state) => state.center.isCenterDetails;
-
 export const CenterDetails = (state) => state.center.selectedCenter;
 export const centerIsLoading = (state) => state.center.isLoading;
 export const SelectSearchCenterLoading = (state) => state.center.IsSearch;
 export const selectCurrentCenterId = (state) => state.center.currentCenterId;
 export const selectCenterIsEdit = (state) => state.center.centerIsEdit;
+export const selectPendingCenterList = (state) => state.center.pendingCenters;
+export const selectIsPendingLoading = (state) => state.center.isPendingLoading;

@@ -25,6 +25,7 @@ function AddClient() {
     UserName: "",
     Phone: "",
     Password: "",
+    ConfirmPassword: "",
     AddressLine1: "",
     AddressLine2: "",
     City: "",

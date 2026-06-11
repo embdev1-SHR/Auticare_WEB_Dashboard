@@ -40,7 +40,6 @@ function AddCenter() {
           ...values,
           Phone: values.Phone.replace("+", ""),
           CenterHeadPhone: values.CenterHeadPhone.replace("+", ""),
-          Password: "",
           UserName: values.EmailId,
         })
       );
@@ -80,6 +79,7 @@ function AddCenter() {
           State: "",
           Country: "",
           Password: "",
+          ConfirmPassword: "",
           ClientID: 0,
           CenterName: "",
           CenterType: "",

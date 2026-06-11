@@ -73,6 +73,8 @@ const CenterValidation = (tab, isClientManagementAvailable = true) => {
         Country: yup.string().max(100, "Too Long!")
           .required("Country is required"),
         Phone: yup.string().max(25, "Too Long!").required("Phone number is required"),
+        Password: yup.string().min(6, "Password must be at least 6 characters").required("Password is required"),
+        ConfirmPassword: yup.string().oneOf([yup.ref("Password"), null], "Passwords must match").required("Please confirm your password"),
       });
     case 2:
       return yup.object().shape({
