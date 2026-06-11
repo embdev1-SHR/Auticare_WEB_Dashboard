@@ -9,8 +9,22 @@ import { selectSubscriptionPlans } from "../../../store/slice/subscription.slice
 function BillingDetails() {
   const dispatch = useDispatch();
   // Grab values and submitForm from context
-  const { errors, touched, setFieldValue } = useFormikContext();
+  const { errors, touched, values, setFieldValue } = useFormikContext();
   const [selectedBillState, setSelectedBillState] = useState("");
+  const [sameAsAddress, setSameAsAddress] = useState(false);
+
+  const handleSameAsAddress = (checked) => {
+    setSameAsAddress(checked);
+    if (checked) {
+      setFieldValue("BillingAddressLine1", values.AddressLine1);
+      setFieldValue("BillingAddressLine2", values.AddressLine2);
+      setFieldValue("BillingCity", values.City);
+      setFieldValue("BillingPincode", values.Pincode);
+      setFieldValue("BillingState", values.State);
+      setFieldValue("BillingCountry", values.Country);
+      setSelectedBillState(values.State ? { value: 0, label: values.State } : "");
+    }
+  };
   const AllCountries = useSelector(selectCountries);
   const CountryList = AllCountries.map((item) => {
     return { value: item.CountryID, label: item.CountryName };
@@ -58,7 +72,21 @@ function BillingDetails() {
 
   return (
     <>
-      <h6 className="mb-3">Billing Address</h6>
+      <div className="d-flex align-items-center justify-content-between mb-3">
+        <h6 className="mb-0">Billing Address</h6>
+        <div className="form-check">
+          <input
+            type="checkbox"
+            className="form-check-input"
+            id="sameAsAddress"
+            checked={sameAsAddress}
+            onChange={(e) => handleSameAsAddress(e.target.checked)}
+          />
+          <label className="form-check-label" htmlFor="sameAsAddress">
+            Same as entered address
+          </label>
+        </div>
+      </div>
       <Row>
         <Col md="6">
           <div className="mb-4">

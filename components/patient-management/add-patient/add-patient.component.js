@@ -48,17 +48,7 @@ function AddPatient() {
   }, []);
 
   const tog_standard = () => {
-    if (UserData.RoleName != "SuperAdmin") {
-      if (SelectPatientBystatus.length >= UserData.SubscriptionPlan[0].NumberofPatients) {
-        ToastNotification("error", "The number of patients allowed in the subscription plan is already created");
-      }
-      else {
-        dispatch(setModalOpen(!setModalOpenState));
-      }
-    }
-    else {
-      dispatch(setModalOpen(!setModalOpenState));
-    }
+    dispatch(setModalOpen(!setModalOpenState));
   };
   const toggleTab = (tab) => {
     if (activeTab !== tab) {

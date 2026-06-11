@@ -32,7 +32,7 @@ function SkillActions({ skill }) {
   const [alert, setAlert] = useState(false);
   const UserId = useSelector(selectUserID);
   const role = useSelector(selectRole);
-  const canManage = UserId === skill.Create_By || ["SuperAdmin", "Admin", "Center", "Therapist"].includes(role);
+  const canManage = UserId === skill.Create_By || ["SuperAdmin", "ClientAdmin", "Center", "Therapist"].includes(role);
 
   const onHandleConfirm = async () => {
     setAlert(false);
