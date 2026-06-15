@@ -1,10 +1,27 @@
 import Link from "next/link";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Badge } from "reactstrap";
-import { selectClientList, selectFilterData, setEdit } from "../../store/slice/client.slice";
+import { Badge, Button } from "reactstrap";
+import { selectClientList, selectFilterData, setEdit, deleteUnonboardedClient } from "../../store/slice/client.slice";
 import ReactTable from "../shared/react-table";
 import ClientActions from "./client-actions.component";
+import Alert from "../shared/alert";
+
+function UnonboardedDeleteBtn({ UserID }) {
+  const dispatch = useDispatch();
+  const [confirm, setConfirm] = useState(false);
+  return (
+    <>
+      <Button color="danger" size="sm" outline onClick={() => setConfirm(true)}>Delete</Button>
+      {confirm && (
+        <Alert
+          onHandleConfirm={() => { setConfirm(false); dispatch(deleteUnonboardedClient(UserID)); }}
+          onDelete={() => setConfirm(false)}
+        />
+      )}
+    </>
+  );
+}
 
 function ClientList() {
   const dispatch = useDispatch();
@@ -85,7 +102,7 @@ function ClientList() {
           row.values.ClientID ? (
             <ClientActions ClientId={row.values.ClientID} Status={row.original.Status} />
           ) : (
-            <span className="text-muted" style={{ fontSize: 12 }}>Awaiting onboarding</span>
+            <UnonboardedDeleteBtn UserID={row.original.UserID} />
           ),
         disableSortBy: true,
       },

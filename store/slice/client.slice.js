@@ -2,7 +2,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { HYDRATE } from "next-redux-wrapper";
 import Router from "next/router";
 import { ToastNotification } from "../../components/shared/toast";
-import { activateSubscription, createClient, deleteClient, permanentDeleteClient, fetchAllClients, fetchClientDetails, searchClient, updateClient, fetchPendingClientsService, approveClientService, rejectClientService, fetchMyClientProfile, submitOnboarding } from "../../services/client.services";
+import { activateSubscription, createClient, deleteClient, permanentDeleteClient, fetchAllClients, fetchClientDetails, searchClient, updateClient, fetchPendingClientsService, approveClientService, rejectClientService, fetchMyClientProfile, submitOnboarding, deleteUnonboardedClientService } from "../../services/client.services";
 import { setModalOpen } from "./layout.slice";
 
 const initialState = {
@@ -166,6 +166,19 @@ export const rejectClient = createAsyncThunk("client/rejectClient", async (UserI
   } catch (error) {
     ToastNotification("error", "Failed to reject registration");
     return thunkApi.rejectWithValue(error.message);
+  }
+});
+
+export const deleteUnonboardedClient = createAsyncThunk("client/deleteUnonboardedClient", async (UserID, thunkApi) => {
+  try {
+    const { data } = await deleteUnonboardedClientService(UserID);
+    ToastNotification("success", "Client deleted");
+    await thunkApi.dispatch(getAllClients());
+    return data;
+  } catch (error) {
+    const message = error.response?.data?.errors?.message || "Delete failed";
+    ToastNotification("error", message);
+    return thunkApi.rejectWithValue(message);
   }
 });
 
