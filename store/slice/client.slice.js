@@ -2,7 +2,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { HYDRATE } from "next-redux-wrapper";
 import Router from "next/router";
 import { ToastNotification } from "../../components/shared/toast";
-import { activateSubscription, createClient, deleteClient, permanentDeleteClient, fetchAllClients, fetchClientDetails, searchClient, updateClient, fetchPendingClientsService, approveClientService, rejectClientService } from "../../services/client.services";
+import { activateSubscription, createClient, deleteClient, permanentDeleteClient, fetchAllClients, fetchClientDetails, searchClient, updateClient, fetchPendingClientsService, approveClientService, rejectClientService, fetchMyClientProfile, submitOnboarding } from "../../services/client.services";
 import { setModalOpen } from "./layout.slice";
 
 const initialState = {
@@ -10,6 +10,9 @@ const initialState = {
   pendingClients: [],
   isPendingLoading: false,
   client: [],
+  clientProfile: null,
+  clientProfileFetched: false,
+  isOnboarding: false,
   isClientCreating: false,
   isLoading: false,
   isEdit: false,
@@ -166,6 +169,34 @@ export const rejectClient = createAsyncThunk("client/rejectClient", async (UserI
   }
 });
 
+export const loadMyClientProfile = createAsyncThunk("client/loadMyClientProfile", async (_, thunkApi) => {
+  try {
+    const { data } = await fetchMyClientProfile();
+    const results = data.results.data;
+    return Array.isArray(results) ? results[0] : results;
+  } catch (error) {
+    return thunkApi.rejectWithValue(error.message);
+  }
+});
+
+export const completeOnboarding = createAsyncThunk("client/completeOnboarding", async (values, thunkApi) => {
+  try {
+    const { data } = await submitOnboarding(values);
+    ToastNotification("success", "Setup complete! Welcome to Auticare.");
+    await thunkApi.dispatch(loadMyClientProfile());
+    Router.push("/dashboard");
+    return data;
+  } catch (error) {
+    const err = error.response?.data?.errors;
+    if (Array.isArray(err)) {
+      err.forEach((e) => ToastNotification("error", "Failed", e.param + " " + e.msg));
+    } else {
+      ToastNotification("error", err?.message || "Setup failed");
+    }
+    return thunkApi.rejectWithValue(error.message);
+  }
+});
+
 export const clientSearch = createAsyncThunk("client/clientSearch", async (searchData, thunkApi) => {
   try {
     const res = await searchClient(searchData);
@@ -301,7 +332,15 @@ export const clientSlice = createSlice({
       .addCase(approveClient.rejected, (state) => { state.isPendingLoading = false; })
       .addCase(rejectClient.pending, (state) => { state.isPendingLoading = true; })
       .addCase(rejectClient.fulfilled, (state) => { state.isPendingLoading = false; })
-      .addCase(rejectClient.rejected, (state) => { state.isPendingLoading = false; });
+      .addCase(rejectClient.rejected, (state) => { state.isPendingLoading = false; })
+      .addCase(loadMyClientProfile.fulfilled, (state, action) => {
+        state.clientProfile = action.payload || null;
+        state.clientProfileFetched = true;
+      })
+      .addCase(loadMyClientProfile.rejected, (state) => { state.clientProfileFetched = true; })
+      .addCase(completeOnboarding.pending, (state) => { state.isOnboarding = true; })
+      .addCase(completeOnboarding.fulfilled, (state) => { state.isOnboarding = false; })
+      .addCase(completeOnboarding.rejected, (state) => { state.isOnboarding = false; });
   },
 });
 
@@ -311,6 +350,9 @@ export const selectClientList = (state) => state.client.clientList;
 export const selectPendingClientList = (state) => state.client.pendingClients;
 export const selectIsClientPendingLoading = (state) => state.client.isPendingLoading;
 export const selectClient = (state) => state.client.client;
+export const selectClientProfile = (state) => state.client.clientProfile;
+export const selectClientProfileFetched = (state) => state.client.clientProfileFetched;
+export const selectIsOnboarding = (state) => state.client.isOnboarding;
 export const selectIsLoading = (state) => state.client.isLoading;
 export const selectIsEdit = (state) => state.client.isEdit;
 export const selectIsSearch = (state) => state.client.IsSearch;

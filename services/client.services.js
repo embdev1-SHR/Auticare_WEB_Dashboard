@@ -41,6 +41,16 @@ export const activateSubscription = async (ClientID) => {
   return result;
 };
 
+export const fetchMyClientProfile = async () => {
+  const result = await Axios.get(`/api/v1/clients/0`);
+  return result;
+};
+
+export const submitOnboarding = async (data) => {
+  const result = await Axios.post(`/api/v1/clients/onboard`, data);
+  return result;
+};
+
 export const fetchPendingClientsService = async () => {
   const result = await Axios.get(`/api/v1/auth/pending-clients`);
   return result;
