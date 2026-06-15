@@ -41,6 +41,21 @@ export const activateSubscription = async (ClientID) => {
   return result;
 };
 
+export const fetchPendingClientsService = async () => {
+  const result = await Axios.get(`/api/v1/auth/pending-clients`);
+  return result;
+};
+
+export const approveClientService = async (data) => {
+  const result = await Axios.post(`/api/v1/auth/approve-client`, data);
+  return result;
+};
+
+export const rejectClientService = async (UserID) => {
+  const result = await Axios.delete(`/api/v1/auth/reject-client/${UserID}`);
+  return result;
+};
+
 // data
 export const ClientTypeList = [
   { value: "Autism Schools", label: "Autism Schools" },

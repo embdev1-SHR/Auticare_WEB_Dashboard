@@ -17,6 +17,7 @@ export const middleware = async (req, event) => {
     pathname == "/" ||
     pathname.startsWith("/login") ||
     pathname.startsWith("/center-signup") ||
+    pathname.startsWith("/client-signup") ||
     pathname.startsWith("/confirm-otp") ||
     pathname.startsWith("/reset-password") ||
     pathname.startsWith("/forgot-password")

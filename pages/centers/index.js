@@ -17,7 +17,6 @@ import {
   searchCenter,
   selectPendingCenterList,
 } from "../../store/slice/center.slice";
-import { getAllClients } from "../../store/slice/client.slice";
 import { changeBreadcrumb, changeTitle } from "../../store/slice/layout.slice";
 import withAuth from "./../../util/helpers/withAuth";
 
@@ -37,7 +36,6 @@ function CenterManagement() {
     dispatch(changeTitle("Centers List"));
     dispatch(changeBreadcrumb(breadcrumb_Items));
     dispatch(fetchAllCenters());
-    dispatch(getAllClients());
     dispatch(fetchPendingCenters());
   }, []);
 

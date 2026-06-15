@@ -2,11 +2,13 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { HYDRATE } from "next-redux-wrapper";
 import Router from "next/router";
 import { ToastNotification } from "../../components/shared/toast";
-import { activateSubscription, createClient, deleteClient, permanentDeleteClient, fetchAllClients, fetchClientDetails, searchClient, updateClient } from "../../services/client.services";
+import { activateSubscription, createClient, deleteClient, permanentDeleteClient, fetchAllClients, fetchClientDetails, searchClient, updateClient, fetchPendingClientsService, approveClientService, rejectClientService } from "../../services/client.services";
 import { setModalOpen } from "./layout.slice";
 
 const initialState = {
   clientList: [],
+  pendingClients: [],
+  isPendingLoading: false,
   client: [],
   isClientCreating: false,
   isLoading: false,
@@ -127,6 +129,40 @@ export const clientPermanentDeletion = createAsyncThunk("client/clientPermanentD
     const message = error.response.data.errors.message;
     ToastNotification("error", message);
     return thunkApi.rejectWithValue(message);
+  }
+});
+
+export const fetchPendingClients = createAsyncThunk("client/fetchPendingClients", async (_, thunkApi) => {
+  try {
+    const { data } = await fetchPendingClientsService();
+    return data.results.data;
+  } catch (error) {
+    return thunkApi.rejectWithValue(error.message);
+  }
+});
+
+export const approveClient = createAsyncThunk("client/approveClient", async (data, thunkApi) => {
+  try {
+    const res = await approveClientService(data);
+    ToastNotification("success", "Client approved successfully");
+    await thunkApi.dispatch(fetchPendingClients());
+    await thunkApi.dispatch(getAllClients());
+    return res.data.results.message;
+  } catch (error) {
+    ToastNotification("error", "Approval failed");
+    return thunkApi.rejectWithValue(error.message);
+  }
+});
+
+export const rejectClient = createAsyncThunk("client/rejectClient", async (UserID, thunkApi) => {
+  try {
+    const res = await rejectClientService(UserID);
+    ToastNotification("success", "Registration rejected");
+    await thunkApi.dispatch(fetchPendingClients());
+    return res.data.results.message;
+  } catch (error) {
+    ToastNotification("error", "Failed to reject registration");
+    return thunkApi.rejectWithValue(error.message);
   }
 });
 
@@ -253,13 +289,27 @@ export const clientSlice = createSlice({
       })
       .addCase(clientSearch.rejected, (state, action) => {
         state.IsSearch = false;
-      });
+      })
+      .addCase(fetchPendingClients.pending, (state) => { state.isPendingLoading = true; })
+      .addCase(fetchPendingClients.fulfilled, (state, action) => {
+        state.isPendingLoading = false;
+        state.pendingClients = action.payload;
+      })
+      .addCase(fetchPendingClients.rejected, (state) => { state.isPendingLoading = false; })
+      .addCase(approveClient.pending, (state) => { state.isPendingLoading = true; })
+      .addCase(approveClient.fulfilled, (state) => { state.isPendingLoading = false; })
+      .addCase(approveClient.rejected, (state) => { state.isPendingLoading = false; })
+      .addCase(rejectClient.pending, (state) => { state.isPendingLoading = true; })
+      .addCase(rejectClient.fulfilled, (state) => { state.isPendingLoading = false; })
+      .addCase(rejectClient.rejected, (state) => { state.isPendingLoading = false; });
   },
 });
 
 export const { setEdit, setCurrentClientId, setSearchKey, setFilterData } = clientSlice.actions;
 // Selectors
 export const selectClientList = (state) => state.client.clientList;
+export const selectPendingClientList = (state) => state.client.pendingClients;
+export const selectIsClientPendingLoading = (state) => state.client.isPendingLoading;
 export const selectClient = (state) => state.client.client;
 export const selectIsLoading = (state) => state.client.isLoading;
 export const selectIsEdit = (state) => state.client.isEdit;
