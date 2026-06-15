@@ -29,17 +29,21 @@ function Layout(props) {
     }
   }, [userData, clientProfile, clientProfileFetched, router.pathname]);
 
+  const isClientAdminPending =
+    userData?.RoleName === "ClientAdmin" &&
+    (!clientProfileFetched || !clientProfile?.ClientType);
+
   return (
     <div id='layout-wrapper'>
       <Header />
       <LeftSidebar />
-      {userData ? (
+      {!userData || isClientAdminPending ? (
+        <Loader />
+      ) : (
         <div className='main-content'>
           {props.children}
           <Footer />
         </div>
-      ) : (
-        <Loader />
       )}
     </div>
   );

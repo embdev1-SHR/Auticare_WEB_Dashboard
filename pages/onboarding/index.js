@@ -73,8 +73,10 @@ export default function Onboarding() {
   });
 
   useEffect(() => {
+    // Layout already fetched the profile before redirecting here.
+    // Only fetch if arriving directly (e.g. browser refresh on /onboarding).
     if (!clientProfileFetched) dispatch(loadMyClientProfile());
-  }, []);
+  }, [clientProfileFetched]);
 
   useEffect(() => {
     if (clientProfile) {
@@ -242,7 +244,7 @@ export default function Onboarding() {
     </div>,
   ];
 
-  if (!userData || (userData.RoleName === "ClientAdmin" && !clientProfileFetched)) {
+  if (!userData || !clientProfileFetched) {
     return <Loader />;
   }
 
