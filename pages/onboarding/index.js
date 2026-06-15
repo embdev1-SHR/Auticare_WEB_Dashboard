@@ -73,7 +73,7 @@ export default function Onboarding() {
   });
 
   useEffect(() => {
-    if (!clientProfile) dispatch(loadMyClientProfile());
+    if (!clientProfileFetched) dispatch(loadMyClientProfile());
   }, []);
 
   useEffect(() => {

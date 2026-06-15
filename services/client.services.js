@@ -51,6 +51,11 @@ export const assignSubscriptionService = async (UserID, data) => {
   return result;
 };
 
+export const updateUnonboardedClientDetailsService = async (UserID, data) => {
+  const result = await Axios.put(`/api/v1/clients/user/${UserID}`, data);
+  return result;
+};
+
 export const fetchMyClientProfile = async () => {
   const result = await Axios.get(`/api/v1/clients/0`);
   return result;

@@ -2,7 +2,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { HYDRATE } from "next-redux-wrapper";
 import Router from "next/router";
 import { ToastNotification } from "../../components/shared/toast";
-import { activateSubscription, createClient, deleteClient, permanentDeleteClient, fetchAllClients, fetchClientDetails, searchClient, updateClient, fetchPendingClientsService, approveClientService, rejectClientService, fetchMyClientProfile, submitOnboarding, deleteUnonboardedClientService, assignSubscriptionService } from "../../services/client.services";
+import { activateSubscription, createClient, deleteClient, permanentDeleteClient, fetchAllClients, fetchClientDetails, searchClient, updateClient, fetchPendingClientsService, approveClientService, rejectClientService, fetchMyClientProfile, submitOnboarding, deleteUnonboardedClientService, assignSubscriptionService, updateUnonboardedClientDetailsService } from "../../services/client.services";
 import { setModalOpen } from "./layout.slice";
 
 const initialState = {
@@ -177,6 +177,19 @@ export const deleteUnonboardedClient = createAsyncThunk("client/deleteUnonboarde
     return data;
   } catch (error) {
     const message = error.response?.data?.errors?.message || "Delete failed";
+    ToastNotification("error", message);
+    return thunkApi.rejectWithValue(message);
+  }
+});
+
+export const updateUnonboardedClientInfo = createAsyncThunk("client/updateUnonboardedClientInfo", async ({ UserID, ...data }, thunkApi) => {
+  try {
+    const { data: res } = await updateUnonboardedClientDetailsService(UserID, data);
+    ToastNotification("success", "Client details updated");
+    await thunkApi.dispatch(getAllClients());
+    return res;
+  } catch (error) {
+    const message = error.response?.data?.errors?.message || "Update failed";
     ToastNotification("error", message);
     return thunkApi.rejectWithValue(message);
   }
@@ -369,7 +382,10 @@ export const clientSlice = createSlice({
       .addCase(completeOnboarding.rejected, (state) => { state.isOnboarding = false; })
       .addCase(assignSubscriptionToClient.pending, (state) => { state.isLoading = true; })
       .addCase(assignSubscriptionToClient.fulfilled, (state) => { state.isLoading = false; })
-      .addCase(assignSubscriptionToClient.rejected, (state) => { state.isLoading = false; });
+      .addCase(assignSubscriptionToClient.rejected, (state) => { state.isLoading = false; })
+      .addCase(updateUnonboardedClientInfo.pending, (state) => { state.isLoading = true; })
+      .addCase(updateUnonboardedClientInfo.fulfilled, (state) => { state.isLoading = false; })
+      .addCase(updateUnonboardedClientInfo.rejected, (state) => { state.isLoading = false; });
   },
 });
 
