@@ -2,7 +2,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { HYDRATE } from "next-redux-wrapper";
 import Router from "next/router";
 import { ToastNotification } from "../../components/shared/toast";
-import { activateSubscription, createClient, deleteClient, permanentDeleteClient, fetchAllClients, fetchClientDetails, searchClient, updateClient, fetchPendingClientsService, approveClientService, rejectClientService, fetchMyClientProfile, submitOnboarding, deleteUnonboardedClientService } from "../../services/client.services";
+import { activateSubscription, createClient, deleteClient, permanentDeleteClient, fetchAllClients, fetchClientDetails, searchClient, updateClient, fetchPendingClientsService, approveClientService, rejectClientService, fetchMyClientProfile, submitOnboarding, deleteUnonboardedClientService, assignSubscriptionService } from "../../services/client.services";
 import { setModalOpen } from "./layout.slice";
 
 const initialState = {
@@ -182,6 +182,19 @@ export const deleteUnonboardedClient = createAsyncThunk("client/deleteUnonboarde
   }
 });
 
+export const assignSubscriptionToClient = createAsyncThunk("client/assignSubscriptionToClient", async ({ UserID, ...data }, thunkApi) => {
+  try {
+    const { data: res } = await assignSubscriptionService(UserID, data);
+    ToastNotification("success", "Subscription assigned successfully");
+    await thunkApi.dispatch(getAllClients());
+    return res;
+  } catch (error) {
+    const message = error.response?.data?.errors?.message || "Failed to assign subscription";
+    ToastNotification("error", message);
+    return thunkApi.rejectWithValue(message);
+  }
+});
+
 export const loadMyClientProfile = createAsyncThunk("client/loadMyClientProfile", async (_, thunkApi) => {
   try {
     const { data } = await fetchMyClientProfile();
@@ -353,7 +366,10 @@ export const clientSlice = createSlice({
       .addCase(loadMyClientProfile.rejected, (state) => { state.clientProfileFetched = true; })
       .addCase(completeOnboarding.pending, (state) => { state.isOnboarding = true; })
       .addCase(completeOnboarding.fulfilled, (state) => { state.isOnboarding = false; })
-      .addCase(completeOnboarding.rejected, (state) => { state.isOnboarding = false; });
+      .addCase(completeOnboarding.rejected, (state) => { state.isOnboarding = false; })
+      .addCase(assignSubscriptionToClient.pending, (state) => { state.isLoading = true; })
+      .addCase(assignSubscriptionToClient.fulfilled, (state) => { state.isLoading = false; })
+      .addCase(assignSubscriptionToClient.rejected, (state) => { state.isLoading = false; });
   },
 });
 

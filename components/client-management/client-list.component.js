@@ -1,24 +1,19 @@
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Badge, Button } from "reactstrap";
-import { selectClientList, selectFilterData, setEdit, deleteUnonboardedClient } from "../../store/slice/client.slice";
+import { selectClientList, selectFilterData, setEdit } from "../../store/slice/client.slice";
+import { getAllSubscriptionPlans, selectSubscriptionPlans } from "../../store/slice/subscription.slice";
 import ReactTable from "../shared/react-table";
 import ClientActions from "./client-actions.component";
-import Alert from "../shared/alert";
+import UnonboardedClientModal from "./unonboarded-client-modal.component";
 
-function UnonboardedDeleteBtn({ UserID }) {
-  const dispatch = useDispatch();
-  const [confirm, setConfirm] = useState(false);
+function ManageBtn({ client }) {
+  const [open, setOpen] = useState(false);
   return (
     <>
-      <Button color="danger" size="sm" outline onClick={() => setConfirm(true)}>Delete</Button>
-      {confirm && (
-        <Alert
-          onHandleConfirm={() => { setConfirm(false); dispatch(deleteUnonboardedClient(UserID)); }}
-          onDelete={() => setConfirm(false)}
-        />
-      )}
+      <Button color="primary" size="sm" outline onClick={() => setOpen(true)}>View & Manage</Button>
+      {open && <UnonboardedClientModal client={client} isOpen={open} onClose={() => setOpen(false)} />}
     </>
   );
 }
@@ -27,6 +22,13 @@ function ClientList() {
   const dispatch = useDispatch();
   const ClientList = useSelector(selectClientList);
   const filterObj = useSelector(selectFilterData);
+  const subscriptionPlans = useSelector(selectSubscriptionPlans);
+
+  useEffect(() => {
+    if (!subscriptionPlans.length) {
+      dispatch(getAllSubscriptionPlans());
+    }
+  }, []);
 
   const filteredData = ClientList.filter((obj) => {
     return Object.keys(filterObj).every((key) => {
@@ -102,7 +104,7 @@ function ClientList() {
           row.values.ClientID ? (
             <ClientActions ClientId={row.values.ClientID} Status={row.original.Status} />
           ) : (
-            <UnonboardedDeleteBtn UserID={row.original.UserID} />
+            <ManageBtn client={row.original} />
           ),
         disableSortBy: true,
       },

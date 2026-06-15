@@ -46,6 +46,11 @@ export const deleteUnonboardedClientService = async (UserID) => {
   return result;
 };
 
+export const assignSubscriptionService = async (UserID, data) => {
+  const result = await Axios.post(`/api/v1/clients/user/${UserID}/assign-subscription`, data);
+  return result;
+};
+
 export const fetchMyClientProfile = async () => {
   const result = await Axios.get(`/api/v1/clients/0`);
   return result;
