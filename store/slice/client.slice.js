@@ -202,7 +202,8 @@ export const assignSubscriptionToClient = createAsyncThunk("client/assignSubscri
     await thunkApi.dispatch(getAllClients());
     return res;
   } catch (error) {
-    const message = error.response?.data?.errors?.message || "Failed to assign subscription";
+    // Axios interceptor wraps 500 errors as plain objects (no .response), so check both paths.
+    const message = error.response?.data?.errors?.message || error.errors?.message || "Failed to assign subscription";
     ToastNotification("error", message);
     return thunkApi.rejectWithValue(message);
   }
