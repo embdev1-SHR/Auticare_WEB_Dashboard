@@ -41,4 +41,4 @@ function ATStore() {
     </Layout>
   );
 }
-export default withAuth(ATStore, "ATStore");
+export default withAuth(ATStore);

@@ -36,7 +36,16 @@ export const DeleteStoreEnquiryService = async (StoreEnquiryID) => {
 };
 
 export const AtStoreUpdateService = async (data) => {
-    console.log("data",data);
     const result = await Axios.put(`/api/v1/products/${data.ProductID}`, data);
+    return result;
+};
+
+export const AtStoreDeleteService = async (ProductID) => {
+    const result = await Axios.delete(`/api/v1/products/${ProductID}`);
+    return result;
+};
+
+export const AtStoreBulkCreateService = async (products) => {
+    const result = await Axios.post(`/api/v1/products/bulk`, { products });
     return result;
 };

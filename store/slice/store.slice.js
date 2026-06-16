@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { ToastNotification } from "../../components/shared/toast";
-import { AtStoreCreation, AtStoreDetailsService, AtStoreListService, AtStoreUpdateService, DeleteStoreEnquiryService, MarkAsReadService, storeCreation, storeEnquiryListService } from "../../services/store.services";
+import { AtStoreCreation, AtStoreDetailsService, AtStoreListService, AtStoreUpdateService, AtStoreDeleteService, AtStoreBulkCreateService, DeleteStoreEnquiryService, MarkAsReadService, storeCreation, storeEnquiryListService } from "../../services/store.services";
 
 
 
@@ -105,6 +105,33 @@ export const AtStoreUpdateSlice = createAsyncThunk("storeSlice/AtStoreUpdateSlic
     }
 });
 
+export const deleteAtStore = createAsyncThunk("storeSlice/deleteAtStore", async (ProductID, thunkApi) => {
+    try {
+        const res = await AtStoreDeleteService(ProductID);
+        ToastNotification("success", "Product deleted successfully");
+        thunkApi.dispatch(AtStoreList());
+        return res.data.results.message;
+    } catch (error) {
+        console.log(error);
+        ToastNotification("error", "Delete failed");
+        return error;
+    }
+});
+
+export const atStoreBulkCreate = createAsyncThunk("storeSlice/atStoreBulkCreate", async (products, thunkApi) => {
+    try {
+        const res = await AtStoreBulkCreateService(products);
+        ToastNotification("success", res.data.results.message || "Products uploaded successfully");
+        thunkApi.dispatch(AtStoreList());
+        return res.data.results.message;
+    } catch (error) {
+        console.log(error);
+        const msg = error.response?.data?.errors?.message || error.errors?.message || "Bulk upload failed";
+        ToastNotification("error", msg);
+        return error;
+    }
+});
+
 export const storeSlice = createSlice({
     name: "storeSlice",
     initialState: {
@@ -198,6 +225,24 @@ export const storeSlice = createSlice({
             })
             .addCase(deleteStoreEnquiry.rejected, (state) => {
                 state.isLoading = false;
+            })
+            .addCase(deleteAtStore.pending, (state) => {
+                state.isLoading = true;
+            })
+            .addCase(deleteAtStore.fulfilled, (state) => {
+                state.isLoading = false;
+            })
+            .addCase(deleteAtStore.rejected, (state) => {
+                state.isLoading = false;
+            })
+            .addCase(atStoreBulkCreate.pending, (state) => {
+                state.isMainPageLoading = true;
+            })
+            .addCase(atStoreBulkCreate.fulfilled, (state) => {
+                state.isMainPageLoading = false;
+            })
+            .addCase(atStoreBulkCreate.rejected, (state) => {
+                state.isMainPageLoading = false;
             })
     },
 });

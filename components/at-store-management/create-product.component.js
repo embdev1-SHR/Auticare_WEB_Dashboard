@@ -80,6 +80,7 @@ const CreateProduct = () => {
         "ImageURL1": values.Upload1 ? values.Upload1 : undefined,
         "ImageURL2": values.Upload2 ? values.Upload2 : undefined,
         "ImageURL3": values.Upload3 ? values.Upload3 : undefined,
+        "BuyURL": values.BuyURL || undefined,
         "Status": 1
       }
       const valueToSendUpdate = {
@@ -93,6 +94,7 @@ const CreateProduct = () => {
         "ImageURL1": values.Upload1 ? values.Upload1 : StoreDetails?.ImageURL1,
         "ImageURL2": values.Upload2 ? values.Upload2 : StoreDetails?.ImageURL2,
         "ImageURL3": values.Upload3 ? values.Upload3 : StoreDetails?.ImageURL3,
+        "BuyURL": values.BuyURL || StoreDetails?.BuyURL || undefined,
         "Status": 1,
         "ProductID": CurrentStoreID
       }
@@ -210,7 +212,8 @@ const CreateProduct = () => {
         SubSkill: Edit ? StoreDetails.Highlights : "",
         ActivityInstructionTitle: Edit ? StoreDetails.ProductDescription : "",
         Category: Edit ? { value: StoreDetails.Category, label: StoreDetails.Category } : "",
-        Upload: Edit ? StoreDetails.ImageURL : ""
+        Upload: Edit ? StoreDetails.ImageURL : "",
+        BuyURL: Edit ? (StoreDetails.BuyURL || "") : ""
       }} validationSchema={YupValidation(activeTab)} onSubmit={onSubmit} enableReinitialize={true}>
         {({ touched, errors, values, handleSubmit, resetForm, isSubmitting, setFieldValue }) => (
           <Modal
@@ -320,6 +323,13 @@ const CreateProduct = () => {
                           placeholder="Enter activity instruction title ..."
                         />
                         {errors.ActivityInstructionTitle && touched.ActivityInstructionTitle ? <ErrorMessage className='text-danger small' name='ActivityInstructionTitle' component='div' /> : null}
+                      </div>
+                      <div className='mb-3'>
+                        <Label className='form-label' htmlFor='BuyURL'>
+                          Buy URL <span className='text-muted'>(optional)</span>
+                        </Label>
+                        <Field id='BuyURL' name='BuyURL' type='text' className='form-control' placeholder='https://...' />
+                        {errors.BuyURL && touched.BuyURL ? <ErrorMessage className='text-danger small' name='BuyURL' component='div' /> : null}
                       </div>
                     </form>
                   </TabPane>
