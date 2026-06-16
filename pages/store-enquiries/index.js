@@ -23,7 +23,7 @@ const AtstoreEnquiry = () => {
     dispatch(changeTitle("Store Enquiries"));
     dispatch(changeBreadcrumb(breadcrumb_Items));
     dispatch(storeEnquiryList());
-  }), [dispatch];
+  }, [dispatch]);
 
   // const childComponent1 = useMemo(() => <Loader />, []);
 
