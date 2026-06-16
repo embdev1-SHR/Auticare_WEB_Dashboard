@@ -2,7 +2,7 @@ import { isEmpty } from "lodash";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { Badge, Card, CardBody, Col, Container, Nav, NavItem, NavLink, Row, TabContent, TabPane, Table } from "reactstrap";
+import { Badge, Button, Card, CardBody, Col, Container, Nav, NavItem, NavLink, Row, TabContent, TabPane, Table } from "reactstrap";
 import PlaceEnquiry from "../../../components/at-store-management/place-enquiry.component";
 import Layout from "../../../components/shared/layout";
 import PageTitle from "../../../components/shared/pagetitle";
@@ -63,6 +63,11 @@ const ProductDetails = () => {
         ) : (
           <div className='main_listing'>
             <Container fluid>
+              <div className='mb-3'>
+                <Button color='light' onClick={() => router.back()}>
+                  <i className='mdi mdi-arrow-left me-1'></i> Back
+                </Button>
+              </div>
               {!isEmpty(product) && (
 
                 <>
@@ -207,4 +212,4 @@ const ProductDetails = () => {
   );
 };
 
-export default withAuth(ProductDetails, "ATStore");
+export default withAuth(ProductDetails);
