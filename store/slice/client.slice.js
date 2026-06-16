@@ -226,13 +226,15 @@ export const completeOnboarding = createAsyncThunk("client/completeOnboarding", 
     Router.push("/dashboard");
     return data;
   } catch (error) {
-    const err = error.response?.data?.errors;
+    // Axios interceptor wraps 500 errors as plain objects (error.response.data),
+    // so check both the standard path and the interceptor-wrapped path.
+    const err = error.response?.data?.errors || error.errors;
     if (Array.isArray(err)) {
       err.forEach((e) => ToastNotification("error", "Failed", e.param + " " + e.msg));
     } else {
       ToastNotification("error", err?.message || "Setup failed");
     }
-    return thunkApi.rejectWithValue(error.message);
+    return thunkApi.rejectWithValue(err?.message || error.message);
   }
 });
 
