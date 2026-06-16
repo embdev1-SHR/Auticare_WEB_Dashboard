@@ -65,7 +65,7 @@ function AddPatient() {
   const onSubmit = async (values, actions) => {
     if (activeTab === 4) {
       const issueList = {}
-      if (values.IssueList) {
+      if (Array.isArray(values.IssueList) && values.IssueList.length > 0) {
         issueList.IssueList = values.IssueList
       }
       await dispatch(
