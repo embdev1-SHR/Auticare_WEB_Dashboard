@@ -1,6 +1,5 @@
 import { Button, Col, Container, Label, Row } from "reactstrap";
 import * as yup from "yup";
-// import images
 
 import { ErrorMessage, Field, Formik } from "formik";
 import Link from "next/link";
@@ -16,11 +15,10 @@ const ForgetPasswordPage = () => {
   const dispatch = useDispatch();
   const router = useRouter();
 
-  // handleValidSubmit
   const handleValidSubmit = async (values) => {
     const originalPromiseResult = await dispatch(forgotPassword(values)).unwrap();
 
-    originalPromiseResult?.success &&
+    if (originalPromiseResult?.success) {
       router.push(
         {
           pathname: "confirm-otp",
@@ -28,14 +26,15 @@ const ForgetPasswordPage = () => {
         },
         "confirm-otp"
       );
+    }
   };
+
   const getYear = () => {
     return new Date().getFullYear();
   };
 
   useEffect(() => {
     document.body.classList.add("auth-body-bg");
-    // returned function will be called on component unmount
     return () => {
       document.body.classList.remove("auth-body-bg");
     };
@@ -45,7 +44,10 @@ const ForgetPasswordPage = () => {
     EmailId: yup
       .string()
       .email("Invalid email address")
-      .matches(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/, "Invalid email address")
+      .matches(
+        /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+        "Invalid email address"
+      )
       .required("Email is required"),
   });
 
@@ -65,23 +67,41 @@ const ForgetPasswordPage = () => {
                             <AuticareLogo />
                           </div>
 
-                          <h4 className='font-size-18 mt-4'>Reset Password</h4>
-                          <p className='text-muted'>Reset your password to Auticare.</p>
+                          <h4 className='font-size-18 mt-4'>Forgot Password?</h4>
+                          <p className='text-muted'>
+                            Enter your registered email address.<br />
+                            We'll send you a one-time OTP to reset your password.
+                          </p>
                         </div>
+
                         <Formik initialValues={{ EmailId: "" }} validationSchema={validationSchema} onSubmit={handleValidSubmit}>
                           {({ handleSubmit, isSubmitting, touched, errors }) => (
-                            <div className='p-2 '>
+                            <div className='p-2'>
                               <div className='form-horizontal'>
                                 <div className='auth-form-group-custom mb-4'>
                                   <i className='ri-mail-line auti-custom-input-icon'></i>
-                                  <Label htmlFor='useremail'>Email</Label>
-                                  <Field name='EmailId' type='email' className='form-control' id='useremail' placeholder='Enter email' />
-                                  {errors.EmailId && touched.EmailId ? <ErrorMessage className='text-danger small p-1' name='EmailId' component='div' /> : null}
+                                  <Label htmlFor='useremail'>Email Address</Label>
+                                  <Field
+                                    name='EmailId'
+                                    type='email'
+                                    className='form-control'
+                                    id='useremail'
+                                    placeholder='Enter your email'
+                                  />
+                                  {errors.EmailId && touched.EmailId ? (
+                                    <ErrorMessage className='text-danger small p-1' name='EmailId' component='div' />
+                                  ) : null}
                                 </div>
 
                                 <div className='mt-4 text-center'>
-                                  <Button color='primary' className='w-md waves-effect waves-light' type='submit' onClick={handleSubmit} disabled={isSubmitting}>
-                                    {isSubmitting ? "Loading..." : "Send OTP"}
+                                  <Button
+                                    color='primary'
+                                    className='w-md waves-effect waves-light'
+                                    type='submit'
+                                    onClick={handleSubmit}
+                                    disabled={isSubmitting}
+                                  >
+                                    {isSubmitting ? "Sending OTP..." : "Send OTP"}
                                   </Button>
                                 </div>
                               </div>
@@ -91,14 +111,14 @@ const ForgetPasswordPage = () => {
 
                         <div className='mt-3 text-center'>
                           <p>
-                            Already have an account ?{" "}
+                            Remember your password?{" "}
                             <Link href='/login' className='fw-medium text-primary'>
                               Log in
                             </Link>
                           </p>
                         </div>
                       </div>
-                      <div className='auth_foot  pb-2'>
+                      <div className='auth_foot pb-2'>
                         <p>
                           © <span id='year'>{getYear()}</span> Auticare.{" "}
                           <span className='powered-by'>

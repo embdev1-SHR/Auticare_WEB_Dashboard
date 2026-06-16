@@ -68,8 +68,8 @@ function LoginForm() {
 
           <div className="mt-4 text-center">
             <p className="text-muted mb-3">
-              Are you a center?{" "}
-              <Link href="/center-signup">
+              New organization?{" "}
+              <Link href="/client-signup">
                 <a className="text-primary fw-medium">Register here</a>
               </Link>
             </p>

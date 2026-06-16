@@ -1,6 +1,5 @@
 import { Button, Col, Container, Label, Row } from "reactstrap";
 import * as yup from "yup";
-// import images
 
 import { ErrorMessage, Field, Formik } from "formik";
 import { useRouter } from "next/router";
@@ -15,30 +14,36 @@ const ResetPasswordPage = () => {
   const dispatch = useDispatch();
   const router = useRouter();
 
-  // handleValidSubmit
   const handleValidSubmit = async (values) => {
-    const originalPromiseResult = await dispatch(resetPassword({ Password: values.Password })).unwrap();
-    originalPromiseResult?.success && router.push("login");
+    const originalPromiseResult = await dispatch(resetPassword({ Password: values.NewPassword })).unwrap();
+    if (originalPromiseResult?.success) {
+      router.push("/login");
+    }
   };
+
   const getYear = () => {
     return new Date().getFullYear();
   };
 
   useEffect(() => {
     document.body.classList.add("auth-body-bg");
-    // returned function will be called on component unmount
     return () => {
       document.body.classList.remove("auth-body-bg");
     };
   }, []);
 
   const [showPassword, setShowPassword] = useState(false);
-
-  const handleClickShowPassword = () => setShowPassword(!showPassword);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const validationSchema = yup.object().shape({
-    NewPassword: yup.string().min(6, "Password must be atleast 6 characters").required("Password is required"),
-    Password: yup.string().oneOf([yup.ref("NewPassword"), null], "Passwords must match"),
+    NewPassword: yup
+      .string()
+      .min(6, "Password must be at least 6 characters")
+      .required("New password is required"),
+    ConfirmPassword: yup
+      .string()
+      .oneOf([yup.ref("NewPassword"), null], "Passwords do not match")
+      .required("Please confirm your password"),
   });
 
   return (
@@ -57,31 +62,67 @@ const ResetPasswordPage = () => {
                             <AuticareLogo />
                           </div>
 
-                          <h4 className='font-size-18 mt-4'>Reset Password</h4>
-                          <p className='text-muted'>Reset your password to Auticare.</p>
+                          <h4 className='font-size-18 mt-4'>Set New Password</h4>
+                          <p className='text-muted'>Choose a strong password for your account.</p>
                         </div>
-                        <Formik initialValues={{ NewPassword: "", Password: "" }} validationSchema={validationSchema} onSubmit={handleValidSubmit}>
+
+                        <Formik
+                          initialValues={{ NewPassword: "", ConfirmPassword: "" }}
+                          validationSchema={validationSchema}
+                          onSubmit={handleValidSubmit}
+                        >
                           {({ handleSubmit, isSubmitting, touched, errors }) => (
-                            <div className='p-2 '>
+                            <div className='p-2'>
                               <div className='form-horizontal'>
                                 <div className='auth-form-group-custom mb-4'>
-                                  <i className=' ri-lock-2-line auti-custom-input-icon'></i>
-                                  <i className={showPassword ? "ri-eye-off-line reverse-custom-input-icon" : "ri-eye-line reverse-custom-input-icon"} onClick={handleClickShowPassword}></i>
-                                  <Label htmlFor='userpsw'>New Password</Label>
-                                  <Field name='NewPassword' type={showPassword ? "text" : "password"} className='form-control' id='userpsw' placeholder='Enter new password' />
-                                  {errors.NewPassword && touched.NewPassword ? <ErrorMessage className='text-danger small p-1' name='NewPassword' component='div' /> : null}
+                                  <i className='ri-lock-2-line auti-custom-input-icon'></i>
+                                  <i
+                                    className={showPassword ? "ri-eye-off-line reverse-custom-input-icon" : "ri-eye-line reverse-custom-input-icon"}
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    style={{ cursor: "pointer" }}
+                                  ></i>
+                                  <Label htmlFor='newPassword'>New Password</Label>
+                                  <Field
+                                    name='NewPassword'
+                                    type={showPassword ? "text" : "password"}
+                                    className='form-control'
+                                    id='newPassword'
+                                    placeholder='Enter new password (min 6 chars)'
+                                  />
+                                  {errors.NewPassword && touched.NewPassword ? (
+                                    <ErrorMessage className='text-danger small p-1' name='NewPassword' component='div' />
+                                  ) : null}
                                 </div>
 
                                 <div className='auth-form-group-custom mb-4'>
-                                  <i className='ri-mail-line auti-custom-input-icon'></i>
-                                  <Label htmlFor='psw'>Confirm Password</Label>
-                                  <Field name='Password' type='password' className='form-control' id='psw' placeholder='confirm password' />
-                                  {errors.Password && touched.Password ? <ErrorMessage className='text-danger small p-1' name='Password' component='div' /> : null}
+                                  <i className='ri-lock-2-line auti-custom-input-icon'></i>
+                                  <i
+                                    className={showConfirm ? "ri-eye-off-line reverse-custom-input-icon" : "ri-eye-line reverse-custom-input-icon"}
+                                    onClick={() => setShowConfirm(!showConfirm)}
+                                    style={{ cursor: "pointer" }}
+                                  ></i>
+                                  <Label htmlFor='confirmPassword'>Confirm Password</Label>
+                                  <Field
+                                    name='ConfirmPassword'
+                                    type={showConfirm ? "text" : "password"}
+                                    className='form-control'
+                                    id='confirmPassword'
+                                    placeholder='Re-enter new password'
+                                  />
+                                  {errors.ConfirmPassword && touched.ConfirmPassword ? (
+                                    <ErrorMessage className='text-danger small p-1' name='ConfirmPassword' component='div' />
+                                  ) : null}
                                 </div>
 
                                 <div className='mt-4 text-center'>
-                                  <Button color='primary' className='w-md waves-effect waves-light' type='submit' onClick={handleSubmit} disabled={isSubmitting}>
-                                    {isSubmitting ? "Loading..." : "Submit"}
+                                  <Button
+                                    color='primary'
+                                    className='w-md waves-effect waves-light'
+                                    type='submit'
+                                    onClick={handleSubmit}
+                                    disabled={isSubmitting}
+                                  >
+                                    {isSubmitting ? "Saving..." : "Reset Password"}
                                   </Button>
                                 </div>
                               </div>
@@ -89,7 +130,7 @@ const ResetPasswordPage = () => {
                           )}
                         </Formik>
                       </div>
-                      <div className='auth_foot  pb-2'>
+                      <div className='auth_foot pb-2'>
                         <p>
                           © <span id='year'>{getYear()}</span> Auticare.{" "}
                           <span className='powered-by'>

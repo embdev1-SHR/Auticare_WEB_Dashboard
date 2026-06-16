@@ -2,21 +2,21 @@ import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Modal, ModalHeader, ModalBody, ModalFooter, Button } from "reactstrap";
 import Alert from "../shared/alert";
-import { approveCenter, rejectCenter, selectIsPendingLoading } from "../../store/slice/center.slice";
+import { approveClient, rejectClient, selectIsClientPendingLoading } from "../../store/slice/client.slice";
 
-function ApproveCenterModal({ pendingCenter, onClose }) {
+function ApproveClientModal({ pendingClient, onClose }) {
   const dispatch = useDispatch();
-  const isLoading = useSelector(selectIsPendingLoading);
+  const isLoading = useSelector(selectIsClientPendingLoading);
   const [showRejectAlert, setShowRejectAlert] = useState(false);
 
   const handleApprove = async () => {
-    await dispatch(approveCenter({ UserID: pendingCenter.UserID }));
+    await dispatch(approveClient({ UserID: pendingClient.UserID }));
     onClose();
   };
 
   const handleRejectConfirm = async () => {
     setShowRejectAlert(false);
-    await dispatch(rejectCenter(pendingCenter.UserID));
+    await dispatch(rejectClient(pendingClient.UserID));
     onClose();
   };
 
@@ -30,14 +30,14 @@ function ApproveCenterModal({ pendingCenter, onClose }) {
   return (
     <>
       <Modal isOpen toggle={onClose} size="md">
-        <ModalHeader toggle={onClose}>Center Registration Details</ModalHeader>
+        <ModalHeader toggle={onClose}>Client Registration Details</ModalHeader>
         <ModalBody>
           <div style={{ background: "#f8f9fa", borderRadius: 8, padding: "16px 20px" }}>
-            {field("Center Name", pendingCenter.CenterName)}
-            {field("Email", pendingCenter.EmailId)}
-            {field("Phone", pendingCenter.Phone)}
-            {field("Address", [pendingCenter.AddressLine1, pendingCenter.City, pendingCenter.State, pendingCenter.Country].filter(Boolean).join(", "))}
-            {field("Registered On", pendingCenter.Create_TS ? new Date(pendingCenter.Create_TS).toLocaleString() : null)}
+            {field("Organization", pendingClient.OrgName)}
+            {field("Email", pendingClient.EmailId)}
+            {field("Phone", pendingClient.Phone)}
+            {field("Address", [pendingClient.AddressLine1, pendingClient.City, pendingClient.State, pendingClient.Country].filter(Boolean).join(", "))}
+            {field("Registered On", pendingClient.Create_TS ? new Date(pendingClient.Create_TS).toLocaleString() : null)}
           </div>
         </ModalBody>
         <ModalFooter className="justify-content-between">
@@ -65,4 +65,4 @@ function ApproveCenterModal({ pendingCenter, onClose }) {
   );
 }
 
-export default ApproveCenterModal;
+export default ApproveClientModal;

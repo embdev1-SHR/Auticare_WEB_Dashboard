@@ -2,12 +2,17 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { HYDRATE } from "next-redux-wrapper";
 import Router from "next/router";
 import { ToastNotification } from "../../components/shared/toast";
-import { activateSubscription, createClient, deleteClient, permanentDeleteClient, fetchAllClients, fetchClientDetails, searchClient, updateClient } from "../../services/client.services";
+import { activateSubscription, createClient, deleteClient, permanentDeleteClient, fetchAllClients, fetchClientDetails, searchClient, updateClient, fetchPendingClientsService, approveClientService, rejectClientService, fetchMyClientProfile, submitOnboarding, deleteUnonboardedClientService, assignSubscriptionService, updateUnonboardedClientDetailsService } from "../../services/client.services";
 import { setModalOpen } from "./layout.slice";
 
 const initialState = {
   clientList: [],
+  pendingClients: [],
+  isPendingLoading: false,
   client: [],
+  clientProfile: null,
+  clientProfileFetched: false,
+  isOnboarding: false,
   isClientCreating: false,
   isLoading: false,
   isEdit: false,
@@ -130,6 +135,107 @@ export const clientPermanentDeletion = createAsyncThunk("client/clientPermanentD
   }
 });
 
+export const fetchPendingClients = createAsyncThunk("client/fetchPendingClients", async (_, thunkApi) => {
+  try {
+    const { data } = await fetchPendingClientsService();
+    return data.results.data;
+  } catch (error) {
+    return thunkApi.rejectWithValue(error.message);
+  }
+});
+
+export const approveClient = createAsyncThunk("client/approveClient", async (data, thunkApi) => {
+  try {
+    const res = await approveClientService(data);
+    ToastNotification("success", "Client approved successfully");
+    await thunkApi.dispatch(fetchPendingClients());
+    await thunkApi.dispatch(getAllClients());
+    return res.data.results.message;
+  } catch (error) {
+    ToastNotification("error", "Approval failed");
+    return thunkApi.rejectWithValue(error.message);
+  }
+});
+
+export const rejectClient = createAsyncThunk("client/rejectClient", async (UserID, thunkApi) => {
+  try {
+    const res = await rejectClientService(UserID);
+    ToastNotification("success", "Registration rejected");
+    await thunkApi.dispatch(fetchPendingClients());
+    return res.data.results.message;
+  } catch (error) {
+    ToastNotification("error", "Failed to reject registration");
+    return thunkApi.rejectWithValue(error.message);
+  }
+});
+
+export const deleteUnonboardedClient = createAsyncThunk("client/deleteUnonboardedClient", async (UserID, thunkApi) => {
+  try {
+    const { data } = await deleteUnonboardedClientService(UserID);
+    ToastNotification("success", "Client deleted");
+    await thunkApi.dispatch(getAllClients());
+    return data;
+  } catch (error) {
+    const message = error.response?.data?.errors?.message || "Delete failed";
+    ToastNotification("error", message);
+    return thunkApi.rejectWithValue(message);
+  }
+});
+
+export const updateUnonboardedClientInfo = createAsyncThunk("client/updateUnonboardedClientInfo", async ({ UserID, ...data }, thunkApi) => {
+  try {
+    const { data: res } = await updateUnonboardedClientDetailsService(UserID, data);
+    ToastNotification("success", "Client details updated");
+    await thunkApi.dispatch(getAllClients());
+    return res;
+  } catch (error) {
+    const message = error.response?.data?.errors?.message || "Update failed";
+    ToastNotification("error", message);
+    return thunkApi.rejectWithValue(message);
+  }
+});
+
+export const assignSubscriptionToClient = createAsyncThunk("client/assignSubscriptionToClient", async ({ UserID, ...data }, thunkApi) => {
+  try {
+    const { data: res } = await assignSubscriptionService(UserID, data);
+    ToastNotification("success", "Subscription assigned successfully");
+    await thunkApi.dispatch(getAllClients());
+    return res;
+  } catch (error) {
+    const message = error.response?.data?.errors?.message || "Failed to assign subscription";
+    ToastNotification("error", message);
+    return thunkApi.rejectWithValue(message);
+  }
+});
+
+export const loadMyClientProfile = createAsyncThunk("client/loadMyClientProfile", async (_, thunkApi) => {
+  try {
+    const { data } = await fetchMyClientProfile();
+    const results = data.results.data;
+    return Array.isArray(results) ? results[0] : results;
+  } catch (error) {
+    return thunkApi.rejectWithValue(error.message);
+  }
+});
+
+export const completeOnboarding = createAsyncThunk("client/completeOnboarding", async (values, thunkApi) => {
+  try {
+    const { data } = await submitOnboarding(values);
+    ToastNotification("success", "Setup complete! Welcome to Auticare.");
+    await thunkApi.dispatch(loadMyClientProfile());
+    Router.push("/dashboard");
+    return data;
+  } catch (error) {
+    const err = error.response?.data?.errors;
+    if (Array.isArray(err)) {
+      err.forEach((e) => ToastNotification("error", "Failed", e.param + " " + e.msg));
+    } else {
+      ToastNotification("error", err?.message || "Setup failed");
+    }
+    return thunkApi.rejectWithValue(error.message);
+  }
+});
+
 export const clientSearch = createAsyncThunk("client/clientSearch", async (searchData, thunkApi) => {
   try {
     const res = await searchClient(searchData);
@@ -184,7 +290,7 @@ export const clientSlice = createSlice({
       })
       .addCase(getAllClients.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.clientList = action.payload.filter((client) => client.Status !== 0);
+        state.clientList = action.payload || [];
       })
       .addCase(getAllClients.rejected, (state) => {
         state.isLoading = false;
@@ -253,14 +359,45 @@ export const clientSlice = createSlice({
       })
       .addCase(clientSearch.rejected, (state, action) => {
         state.IsSearch = false;
-      });
+      })
+      .addCase(fetchPendingClients.pending, (state) => { state.isPendingLoading = true; })
+      .addCase(fetchPendingClients.fulfilled, (state, action) => {
+        state.isPendingLoading = false;
+        state.pendingClients = action.payload;
+      })
+      .addCase(fetchPendingClients.rejected, (state) => { state.isPendingLoading = false; })
+      .addCase(approveClient.pending, (state) => { state.isPendingLoading = true; })
+      .addCase(approveClient.fulfilled, (state) => { state.isPendingLoading = false; })
+      .addCase(approveClient.rejected, (state) => { state.isPendingLoading = false; })
+      .addCase(rejectClient.pending, (state) => { state.isPendingLoading = true; })
+      .addCase(rejectClient.fulfilled, (state) => { state.isPendingLoading = false; })
+      .addCase(rejectClient.rejected, (state) => { state.isPendingLoading = false; })
+      .addCase(loadMyClientProfile.fulfilled, (state, action) => {
+        state.clientProfile = action.payload || null;
+        state.clientProfileFetched = true;
+      })
+      .addCase(loadMyClientProfile.rejected, (state) => { state.clientProfileFetched = true; })
+      .addCase(completeOnboarding.pending, (state) => { state.isOnboarding = true; })
+      .addCase(completeOnboarding.fulfilled, (state) => { state.isOnboarding = false; })
+      .addCase(completeOnboarding.rejected, (state) => { state.isOnboarding = false; })
+      .addCase(assignSubscriptionToClient.pending, (state) => { state.isLoading = true; })
+      .addCase(assignSubscriptionToClient.fulfilled, (state) => { state.isLoading = false; })
+      .addCase(assignSubscriptionToClient.rejected, (state) => { state.isLoading = false; })
+      .addCase(updateUnonboardedClientInfo.pending, (state) => { state.isLoading = true; })
+      .addCase(updateUnonboardedClientInfo.fulfilled, (state) => { state.isLoading = false; })
+      .addCase(updateUnonboardedClientInfo.rejected, (state) => { state.isLoading = false; });
   },
 });
 
 export const { setEdit, setCurrentClientId, setSearchKey, setFilterData } = clientSlice.actions;
 // Selectors
 export const selectClientList = (state) => state.client.clientList;
+export const selectPendingClientList = (state) => state.client.pendingClients;
+export const selectIsClientPendingLoading = (state) => state.client.isPendingLoading;
 export const selectClient = (state) => state.client.client;
+export const selectClientProfile = (state) => state.client.clientProfile;
+export const selectClientProfileFetched = (state) => state.client.clientProfileFetched;
+export const selectIsOnboarding = (state) => state.client.isOnboarding;
 export const selectIsLoading = (state) => state.client.isLoading;
 export const selectIsEdit = (state) => state.client.isEdit;
 export const selectIsSearch = (state) => state.client.IsSearch;

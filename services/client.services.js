@@ -41,6 +41,46 @@ export const activateSubscription = async (ClientID) => {
   return result;
 };
 
+export const deleteUnonboardedClientService = async (UserID) => {
+  const result = await Axios.delete(`/api/v1/clients/user/${UserID}`);
+  return result;
+};
+
+export const assignSubscriptionService = async (UserID, data) => {
+  const result = await Axios.post(`/api/v1/clients/user/${UserID}/assign-subscription`, data);
+  return result;
+};
+
+export const updateUnonboardedClientDetailsService = async (UserID, data) => {
+  const result = await Axios.put(`/api/v1/clients/user/${UserID}`, data);
+  return result;
+};
+
+export const fetchMyClientProfile = async () => {
+  const result = await Axios.get(`/api/v1/clients/0`);
+  return result;
+};
+
+export const submitOnboarding = async (data) => {
+  const result = await Axios.post(`/api/v1/clients/onboard`, data);
+  return result;
+};
+
+export const fetchPendingClientsService = async () => {
+  const result = await Axios.get(`/api/v1/auth/pending-clients`);
+  return result;
+};
+
+export const approveClientService = async (data) => {
+  const result = await Axios.post(`/api/v1/auth/approve-client`, data);
+  return result;
+};
+
+export const rejectClientService = async (UserID) => {
+  const result = await Axios.delete(`/api/v1/auth/reject-client/${UserID}`);
+  return result;
+};
+
 // data
 export const ClientTypeList = [
   { value: "Autism Schools", label: "Autism Schools" },
