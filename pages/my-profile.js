@@ -2,7 +2,9 @@ import { ErrorMessage, Field, Formik } from "formik";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Select from "react-select";
-import { Button, Col, Label, Row } from "reactstrap";
+import { Button, Col, FormGroup, Label, Row } from "reactstrap";
+import Axios from "../util/api.util";
+import { ToastNotification } from "../components/shared/toast";
 import * as Yup from "yup";
 import FileDropZoneForm from "../components/shared/filedropzoneform";
 import Layout from "../components/shared/layout";
@@ -16,6 +18,75 @@ import { getTherapist, selectTherapist, selectTherapistLoading, therapistUpdatio
 import { CenterDetails, SelectCenter, centerIsLoading, updateCenter } from "../store/slice/center.slice";
 import FACILITATORS from "../constants/facilitators.constant";
 import Loader from "../components/shared/loader";
+
+const SuperAdminProfile = ({ UserData }) => {
+  const [name, setName] = useState(UserData?.UserName || "");
+  const [phone, setPhone] = useState(UserData?.Phone || "");
+  const [saving, setSaving] = useState(false);
+
+  const handleSave = async () => {
+    if (!name.trim()) return ToastNotification("error", "Name is required");
+    setSaving(true);
+    try {
+      await Axios.put("/api/v1/users/profile", { UserName: name, Phone: phone });
+      ToastNotification("success", "Profile updated successfully");
+    } catch (error) {
+      const msg = error.response?.data?.errors?.message || error.errors?.message || "Failed to update profile";
+      ToastNotification("error", msg);
+    }
+    setSaving(false);
+  };
+
+  return (
+    <div className="card">
+      <div className="card-body">
+        <h5 className="card-title mb-4">Admin Profile</h5>
+        <Row>
+          <Col md="6">
+            <FormGroup>
+              <Label>Full Name</Label>
+              <input
+                type="text"
+                className="form-control"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Enter your name"
+              />
+            </FormGroup>
+          </Col>
+          <Col md="6">
+            <FormGroup>
+              <Label>Email</Label>
+              <input
+                type="text"
+                className="form-control bg-light"
+                value={UserData?.EmailId || ""}
+                readOnly
+              />
+            </FormGroup>
+          </Col>
+          <Col md="6">
+            <FormGroup>
+              <Label>Phone</Label>
+              <input
+                type="text"
+                className="form-control"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="Enter phone number"
+              />
+            </FormGroup>
+          </Col>
+        </Row>
+        <div className="d-flex justify-content-end">
+          <Button color="primary" onClick={handleSave} disabled={saving}>
+            {saving ? "Saving..." : "Save Changes"}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const MyProfile = () => {
   const dispatch = useDispatch();
@@ -430,6 +501,10 @@ const MyProfile = () => {
           <Formik initialValues={InitialValues} validationSchema={validationSchema} onSubmit={onSubmit}>
             {({ touched, errors, handleSubmit, setFieldValue, values }) => (
               <div className='main_listing'>
+                {/* ******************************  SuperAdmin Profile  ****************************** */}
+                {UserData.RoleName === "SuperAdmin" && (
+                  <SuperAdminProfile UserData={UserData} />
+                )}
                 {/* ******************************  Client Users  ****************************** */}
                 {UserData.RoleName === "ClientAdmin" && <>
                   {console.log("errors", errors)}
