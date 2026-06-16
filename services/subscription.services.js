@@ -17,3 +17,8 @@ export const updateSubscriptionPlanService = async (data ) => {
   const result = await Axios.put(`/api/v1/subscriptionPlans/${data.SubscriptionPlanID}`, data.body);
   return result;
 };
+
+export const deleteSubscriptionPlanService = async (SubscriptionPlanID) => {
+  const result = await Axios.delete(`/api/v1/subscriptionPlans/${SubscriptionPlanID}`);
+  return result;
+};

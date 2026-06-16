@@ -5,7 +5,8 @@ import {
   AddSubscriptionPlans,
   SubscriptionPlanService,
   fetchAllSubscriptionPlans,
-  updateSubscriptionPlanService
+  updateSubscriptionPlanService,
+  deleteSubscriptionPlanService,
 } from "../../services/subscription.services";
 import { setModalOpen } from "./layout.slice";
 
@@ -70,6 +71,20 @@ export const SubscriptionPlans = createAsyncThunk("skill/SubscriptionPlans", asy
 });
 
 
+
+export const deleteSubscriptionPlan = createAsyncThunk("subscription/deleteSubscriptionPlan", async (SubscriptionPlanID, thunkApi) => {
+  try {
+    const res = await deleteSubscriptionPlanService(SubscriptionPlanID);
+    ToastNotification("success", "Subscription plan deleted successfully");
+    thunkApi.dispatch(getAllSubscriptionPlans());
+    return res.data.results.message;
+  } catch (error) {
+    console.log(error);
+    const message = error.response?.data?.errors?.message || "Delete failed";
+    ToastNotification("error", message);
+    return thunkApi.rejectWithValue(message);
+  }
+});
 
 export const SubscriptionPlanDetails = createAsyncThunk("skill/SubscriptionPlanDetails", async (data, thunkApi) => {
   try {
@@ -138,6 +153,15 @@ export const subscriptionSlice = createSlice({
         state.isLoading = true;
       })
       .addCase(SubscriptionPlans.fulfilled, (state, action) => {
+        state.isLoading = false;
+      })
+      .addCase(deleteSubscriptionPlan.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(deleteSubscriptionPlan.fulfilled, (state) => {
+        state.isLoading = false;
+      })
+      .addCase(deleteSubscriptionPlan.rejected, (state) => {
         state.isLoading = false;
       });
   },

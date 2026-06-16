@@ -7,10 +7,12 @@ import {
   DropdownMenu,
   DropdownToggle,
 } from "reactstrap";
-import { UpdateSubscriptionPlans, setEdit } from "../../store/slice/subscription.slice";
+import { UpdateSubscriptionPlans, deleteSubscriptionPlan, setEdit } from "../../store/slice/subscription.slice";
+import Alert from "../shared/alert";
 
 function PlanActions({SubscriptionPlanID, data}) {
   const [isOpen, setIsOpen] = useState(false);
+  const [alert, setAlert] = useState(false);
   const router = useRouter();
   const dispatch = useDispatch();
 
@@ -99,9 +101,17 @@ function PlanActions({SubscriptionPlanID, data}) {
         <DropdownMenu className="dropdown-menu-right" style={{marginBottom:"-100%",marginRight:"-150%"}}>
           <DropdownItem onClick={onView}>View Details</DropdownItem>
           <DropdownItem onClick={onEdit}>Edit</DropdownItem>
-          {data.Status? <DropdownItem onClick={HandleDisable}>Disable</DropdownItem> : <DropdownItem onClick={HandleEnable}>Enable</DropdownItem>}
+          {data.Status ? <DropdownItem onClick={HandleDisable}>Disable</DropdownItem> : <DropdownItem onClick={HandleEnable}>Enable</DropdownItem>}
+          <DropdownItem divider />
+          <DropdownItem className="text-danger" onClick={() => setAlert(true)}>Delete</DropdownItem>
         </DropdownMenu>
       </Dropdown>
+      {alert && (
+        <Alert
+          onHandleConfirm={() => { dispatch(deleteSubscriptionPlan(SubscriptionPlanID)); setAlert(false); }}
+          onDelete={() => setAlert(false)}
+        />
+      )}
     </div>
   );
 }
