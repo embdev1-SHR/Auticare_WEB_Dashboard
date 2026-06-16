@@ -125,7 +125,7 @@ export const getUserData = createAsyncThunk("auth/getUserData", async (args, thu
     if (RefreshTokenValue) {
       const { data } = await Axios.get(`/api/v1/users/details`);
       const SubscriptionPlan = data.results.data.SubscriptionPlan
-      if (SubscriptionPlan) {
+      if (SubscriptionPlan && SubscriptionPlan.length > 0) {
         const endDate = SubscriptionPlan[SubscriptionPlan.length - 1].SubcriptionPlanEndDate
         const SubscriptionPlanEndDate = Date.parse(endDate)
         const currentDate = Date.parse(new Date())
