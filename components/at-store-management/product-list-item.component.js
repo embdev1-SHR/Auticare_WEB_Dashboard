@@ -29,17 +29,6 @@ const ProductListItem = ({ product }) => {
             <b>&#8377;{product.DiscountedPrice}</b>
           </h5>
         </div>
-        {product.BuyURL && (
-          <div className='text-center mt-2 mb-2'>
-            <a
-              href={product.BuyURL}
-              target='_blank'
-              rel='noopener noreferrer'
-              className='btn btn-primary btn-sm waves-effect waves-light'>
-              Buy Now
-            </a>
-          </div>
-        )}
       </div>
     </Col>
   );

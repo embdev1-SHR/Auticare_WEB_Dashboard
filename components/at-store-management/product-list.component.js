@@ -20,7 +20,6 @@ const TEMPLATE_HEADERS = [
   "ImageURL1",
   "ImageURL2",
   "ImageURL3",
-  "BuyURL",
 ];
 
 const StoreProductsList = () => {
@@ -78,7 +77,6 @@ const StoreProductsList = () => {
           ImageURL1: r.ImageURL1 || null,
           ImageURL2: r.ImageURL2 || null,
           ImageURL3: r.ImageURL3 || null,
-          BuyURL: r.BuyURL || null,
         }));
       if (products.length > 0) {
         dispatch(atStoreBulkCreate(products));
@@ -158,7 +156,6 @@ const StoreProductsList = () => {
                       <th>Category</th>
                       <th>Price</th>
                       <th>Discounted Price</th>
-                      <th>Buy</th>
                       <th>Actions</th>
                     </tr>
                   </thead>
@@ -180,19 +177,6 @@ const StoreProductsList = () => {
                           </td>
                           <td>
                             <b>&#8377;{product.DiscountedPrice}</b>
-                          </td>
-                          <td>
-                            {product.BuyURL ? (
-                              <a
-                                href={product.BuyURL}
-                                target='_blank'
-                                rel='noopener noreferrer'
-                                className='btn btn-primary btn-sm'>
-                                Buy Now
-                              </a>
-                            ) : (
-                              <span className='text-muted'>—</span>
-                            )}
                           </td>
                           <td>
                             <AtStoreActions product={product} />
