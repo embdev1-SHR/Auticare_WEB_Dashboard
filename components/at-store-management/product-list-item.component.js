@@ -1,10 +1,16 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { useSelector } from "react-redux";
 import { Col } from "reactstrap";
+import { selectRole } from "../../store/slice/auth.slice";
 import AtStoreActions from "./atStore-actions.component";
+import PlaceEnquiry from "./place-enquiry.component";
 
 const ProductListItem = ({ product }) => {
   const { push } = useRouter();
+  const role = useSelector(selectRole);
+  const canEnquire = role === "ClientAdmin" || role === "Center";
+
   return (
     <Col xl='4' sm='6'>
       <div className='product-box'>
@@ -29,6 +35,11 @@ const ProductListItem = ({ product }) => {
             <b>&#8377;{product.DiscountedPrice}</b>
           </h5>
         </div>
+        {canEnquire && (
+          <div className='text-center mt-2 mb-2'>
+            <PlaceEnquiry ProductId={product.ProductID} />
+          </div>
+        )}
       </div>
     </Col>
   );

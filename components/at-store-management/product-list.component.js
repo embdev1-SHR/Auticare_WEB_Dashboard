@@ -7,6 +7,7 @@ import { selectRole } from "../../store/slice/auth.slice";
 import { atStoreBulkCreate, fetchAllAtStoreList } from "../../store/slice/store.slice";
 import AtStoreActions from "./atStore-actions.component";
 import CreateProduct from "./create-product.component";
+import PlaceEnquiry from "./place-enquiry.component";
 import ProductListItem from "./product-list-item.component";
 
 const TEMPLATE_HEADERS = [
@@ -156,6 +157,7 @@ const StoreProductsList = () => {
                       <th>Category</th>
                       <th>Price</th>
                       <th>Discounted Price</th>
+                      {(role === "ClientAdmin" || role === "Center") && <th>Enquiry</th>}
                       <th>Actions</th>
                     </tr>
                   </thead>
@@ -178,6 +180,9 @@ const StoreProductsList = () => {
                           <td>
                             <b>&#8377;{product.DiscountedPrice}</b>
                           </td>
+                          {(role === "ClientAdmin" || role === "Center") && (
+                            <td><PlaceEnquiry ProductId={product.ProductID} /></td>
+                          )}
                           <td>
                             <AtStoreActions product={product} />
                           </td>
