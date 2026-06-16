@@ -1,12 +1,98 @@
 import React, { useEffect } from "react";
-import { Button, Card, CardBody, Col, Row, Table } from "reactstrap";
-import { selectUserData, setUserData } from "../../store/slice/auth.slice"
+import { Badge, Button, Card, CardBody, Col, Progress, Row, Table } from "reactstrap";
+import { selectUserData } from "../../store/slice/auth.slice";
 import Link from "next/link";
 import { useSelector } from "react-redux";
 import { selectDashboardData } from "../../store/slice/common.slice";
 import { useDispatch } from "react-redux";
 import { getClient, selectClient } from "../../store/slice/client.slice";
-import { useRouter } from "next/router";
+
+function SubscriptionCard({ data }) {
+  const planName = data?.PlanName;
+  const status = data?.SubscriptionPlanStatus;
+  const startDate = data?.SubscriptionPlanActivatedDate;
+  const endDate = data?.SubcriptionPlanEndDate;
+
+  const now = Date.now();
+  const start = startDate ? new Date(startDate).getTime() : null;
+  const end = endDate ? new Date(endDate).getTime() : null;
+  const daysLeft = end ? Math.max(0, Math.ceil((end - now) / (1000 * 60 * 60 * 24))) : null;
+  const totalDays = start && end ? Math.ceil((end - start) / (1000 * 60 * 60 * 24)) : null;
+  const progress = totalDays && start ? Math.min(100, Math.max(0, Math.round(((now - start) / (end - start)) * 100))) : 0;
+  const isExpired = end && now > end;
+  const isActive = status === "Payment Success" && !isExpired;
+
+  const fmt = (d) =>
+    d ? new Date(d).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "—";
+
+  const statusBadge = !planName ? (
+    <Badge color="secondary">Not Assigned</Badge>
+  ) : isExpired ? (
+    <Badge color="danger">Expired</Badge>
+  ) : isActive ? (
+    <Badge color="success">Active</Badge>
+  ) : (
+    <Badge color="warning">{status || "Pending"}</Badge>
+  );
+
+  return (
+    <Card className="mb-3">
+      <CardBody>
+        <div className="d-flex align-items-center justify-content-between mb-3">
+          <h5 className="card-title mb-0" style={{ fontSize: 16 }}>
+            <i className="ri-shield-check-line me-2" style={{ color: "#3b5bdb" }} />
+            Subscription Plan
+          </h5>
+          {statusBadge}
+        </div>
+
+        {!planName ? (
+          <p className="text-muted mb-0" style={{ fontSize: 13 }}>
+            No subscription plan has been assigned yet. Please contact your administrator.
+          </p>
+        ) : (
+          <Row className="align-items-center">
+            <Col md={3}>
+              <div style={{ fontSize: 12, color: "#868e96", marginBottom: 2 }}>Plan</div>
+              <div style={{ fontWeight: 700, fontSize: 15, color: "#1e1e2d" }}>{planName}</div>
+            </Col>
+            <Col md={3}>
+              <div style={{ fontSize: 12, color: "#868e96", marginBottom: 2 }}>Start Date</div>
+              <div style={{ fontWeight: 500, fontSize: 14 }}>{fmt(startDate)}</div>
+            </Col>
+            <Col md={3}>
+              <div style={{ fontSize: 12, color: "#868e96", marginBottom: 2 }}>Expiry Date</div>
+              <div style={{ fontWeight: 500, fontSize: 14, color: isExpired ? "#c92a2a" : "inherit" }}>
+                {fmt(endDate)}
+              </div>
+            </Col>
+            <Col md={3}>
+              <div style={{ fontSize: 12, color: "#868e96", marginBottom: 2 }}>
+                {isExpired ? "Expired" : "Days Remaining"}
+              </div>
+              <div style={{ fontWeight: 700, fontSize: 15, color: isExpired ? "#c92a2a" : daysLeft <= 30 ? "#e67700" : "#2f9e44" }}>
+                {isExpired ? "Expired" : daysLeft !== null ? `${daysLeft} days` : "—"}
+              </div>
+            </Col>
+            {totalDays && (
+              <Col md={12} className="mt-3">
+                <div className="d-flex justify-content-between mb-1" style={{ fontSize: 11, color: "#868e96" }}>
+                  <span>Plan usage</span>
+                  <span>{progress}% elapsed</span>
+                </div>
+                <Progress
+                  value={progress}
+                  color={isExpired ? "danger" : progress > 80 ? "warning" : "success"}
+                  style={{ height: 6, borderRadius: 3 }}
+                />
+              </Col>
+            )}
+          </Row>
+        )}
+      </CardBody>
+    </Card>
+  );
+}
 
 const ClientDashboardComponent = () => {
   const dashboardAnalyticsData = useSelector(selectDashboardData);
@@ -14,7 +100,6 @@ const ClientDashboardComponent = () => {
   const count = dashboardAnalyticsData?.userCounts;
   const recentPatients = dashboardAnalyticsData?.recentPatientList;
   const dispatch = useDispatch();
-
 
   const clientData = useSelector(selectClient);
   const data = clientData[0];
@@ -25,10 +110,10 @@ const ClientDashboardComponent = () => {
     }
   }, [UserData]);
 
-  console.log("data >>>>", data);
-
   return (
     <>
+      <SubscriptionCard data={data} />
+
       <Row>
         <Col lg={4}>
           <Link href={"/centers"}>
