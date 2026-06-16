@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { ToastNotification } from "../../components/shared/toast";
-import { AtStoreCreation, AtStoreDetailsService, AtStoreListService, AtStoreUpdateService, MarkAsReadService, storeCreation, storeEnquiryListService } from "../../services/store.services";
+import { AtStoreCreation, AtStoreDetailsService, AtStoreListService, AtStoreUpdateService, DeleteStoreEnquiryService, MarkAsReadService, storeCreation, storeEnquiryListService } from "../../services/store.services";
 
 
 
@@ -61,6 +61,19 @@ export const storeCreationSlice = createAsyncThunk("storeSlice/storeCreationSlic
     } catch (error) {
         console.log(error);
         ToastNotification("error", " Enquiry added Failed");
+        return error;
+    }
+});
+
+export const deleteStoreEnquiry = createAsyncThunk("storeSlice/deleteStoreEnquiry", async (StoreEnquiryID, thunkApi) => {
+    try {
+        const res = await DeleteStoreEnquiryService(StoreEnquiryID);
+        ToastNotification("success", "Enquiry deleted successfully");
+        thunkApi.dispatch(storeEnquiryList());
+        return res.data.results.message;
+    } catch (error) {
+        console.log(error);
+        ToastNotification("error", "Delete failed");
         return error;
     }
 });
@@ -176,6 +189,15 @@ export const storeSlice = createSlice({
             })
             .addCase(storeCreationSlice.rejected, (state, action) => {
                 state.isMainPageLoading = false;
+            })
+            .addCase(deleteStoreEnquiry.pending, (state) => {
+                state.isLoading = true;
+            })
+            .addCase(deleteStoreEnquiry.fulfilled, (state) => {
+                state.isLoading = false;
+            })
+            .addCase(deleteStoreEnquiry.rejected, (state) => {
+                state.isLoading = false;
             })
     },
 });

@@ -30,6 +30,11 @@ export const AtStoreDetailsService = async (ProductID) => {
     return result;
 };
 
+export const DeleteStoreEnquiryService = async (StoreEnquiryID) => {
+    const result = await Axios.delete(`/api/v1/storeEnquiries/${StoreEnquiryID}`);
+    return result;
+};
+
 export const AtStoreUpdateService = async (data) => {
     console.log("data",data);
     const result = await Axios.put(`/api/v1/products/${data.ProductID}`, data);

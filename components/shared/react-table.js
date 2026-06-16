@@ -9,7 +9,7 @@ import SimpleBarComponent from "./simplebar";
 
 function ReactTable(props) {
   const dispatch = useDispatch();
-  const { columns, data } = props;
+  const { columns, data, getRowProps = () => ({}) } = props;
 
   const tableInstance = useTable(
     {
@@ -159,7 +159,7 @@ function ReactTable(props) {
                   {page.map((row, index) => {
                     prepareRow(row);
                     return (
-                      <tr key={index} {...row.getRowProps()}>
+                      <tr key={index} {...row.getRowProps(getRowProps(row))}>
                         {row.cells.map((cell, key) => {
                           return (
                             <td
