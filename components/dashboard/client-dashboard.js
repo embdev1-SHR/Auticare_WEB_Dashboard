@@ -16,11 +16,13 @@ const ClientDashboardComponent = () => {
   const dispatch = useDispatch();
 
 
-  const data = useSelector(selectClient)
-  data = data[0]
+  const clientData = useSelector(selectClient);
+  const data = clientData[0];
 
   useEffect(() => {
-    dispatch(getClient(UserData.UserID));
+    if (UserData?.UserID) {
+      dispatch(getClient(UserData.UserID));
+    }
   }, [UserData]);
 
   console.log("data >>>>", data);
