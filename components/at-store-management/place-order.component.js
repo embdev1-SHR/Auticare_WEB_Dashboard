@@ -28,7 +28,7 @@ const PlaceOrder = ({ ProductId, ProductName }) => {
 
   const onSubmit = (values, { resetForm }) => {
     const data = {
-      ProductID: ProductId,
+      ProductID: Number(ProductId),
       Quantity: Number(values.Quantity),
       ShippingAddress: values.ShippingAddress,
       ContactName: values.ContactName,

@@ -151,7 +151,8 @@ export const storeOrderCreate = createAsyncThunk("storeSlice/storeOrderCreate", 
         return res.data.results.message;
     } catch (error) {
         console.log(error);
-        ToastNotification("error", "Failed to place order");
+        const msg = error?.errors?.message || error?.response?.data?.errors?.message || "Failed to place order";
+        ToastNotification("error", msg);
         return error;
     }
 });
