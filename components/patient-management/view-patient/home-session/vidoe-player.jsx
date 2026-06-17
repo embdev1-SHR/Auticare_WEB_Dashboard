@@ -18,7 +18,7 @@ const parseAnnotations = (overlays) =>
     }))
     .sort((a, b) => a.timestamp - b.timestamp);
 
-export const VideoPlayer = ({ file_src, overlays }) => {
+export const VideoPlayer = ({ file_src, overlays, poster, onPosterChange }) => {
   const videoRef = useRef(null);
   const [annotations, setAnnotations] = useState(() => parseAnnotations(overlays));
   const [currentTime, setCurrentTime] = useState(0);
@@ -26,6 +26,8 @@ export const VideoPlayer = ({ file_src, overlays }) => {
   const [newText, setNewText] = useState("");
   const [editingId, setEditingId] = useState(null);
   const [editText, setEditText] = useState("");
+  const [posterInput, setPosterInput] = useState(poster || "");
+  const [showPosterForm, setShowPosterForm] = useState(false);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -68,11 +70,57 @@ export const VideoPlayer = ({ file_src, overlays }) => {
           <video
             ref={videoRef}
             src={file_src}
+            poster={posterInput || undefined}
             controls
             style={{ width: "100%", height: "100%", display: "block" }}
             controlsList="nodownload"
           />
         </div>
+
+        {/* Thumbnail (poster) editor — shown when onPosterChange is provided */}
+        {onPosterChange && (
+          <div className="thumbnail-bar">
+            {showPosterForm ? (
+              <div className="annotation-input-row">
+                <Input
+                  type="url"
+                  placeholder="Thumbnail URL (https://…)"
+                  value={posterInput}
+                  onChange={(e) => setPosterInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      onPosterChange(posterInput);
+                      setShowPosterForm(false);
+                    }
+                  }}
+                  autoFocus
+                  className="annotation-text-input"
+                />
+                <Button
+                  size="sm"
+                  color="primary"
+                  onClick={() => { onPosterChange(posterInput); setShowPosterForm(false); }}
+                >
+                  Set
+                </Button>
+                <Button size="sm" color="light" onClick={() => setShowPosterForm(false)}>Cancel</Button>
+              </div>
+            ) : (
+              <Button size="sm" outline color="secondary" onClick={() => setShowPosterForm(true)} className="add-annotation-btn">
+                <i className="mdi mdi-image me-1"></i>
+                {posterInput ? "Change Thumbnail" : "Set Thumbnail"}
+              </Button>
+            )}
+            {posterInput && !showPosterForm && (
+              <img
+                src={posterInput}
+                alt="thumbnail"
+                style={{ height: 36, borderRadius: 4, objectFit: "cover", marginLeft: 8 }}
+                onError={(e) => { e.target.style.display = "none"; }}
+              />
+            )}
+          </div>
+        )}
 
         <div className="annotation-bar">
           {showAddForm ? (
@@ -197,8 +245,18 @@ export const VideoPlayer = ({ file_src, overlays }) => {
           height: 100%;
           object-fit: contain;
         }
+        .thumbnail-bar {
+          margin-top: 8px;
+          padding: 8px 12px;
+          background: #f0f4f8;
+          border: 1px solid #dde3ea;
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
         .annotation-bar {
-          margin-top: 12px;
+          margin-top: 8px;
           padding: 10px 14px;
           background: #f8f9fa;
           border: 1px solid #e9ecef;

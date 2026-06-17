@@ -14,9 +14,15 @@ export const fetchAllStates = async (CountryID) => {
 };
 
 export const imageUpload = async (formData) => {
-  // Do NOT set Content-Type manually — axios detects FormData and sets multipart/form-data
-  // with the correct boundary automatically. Manual override loses the boundary and breaks multer.
-  const result = await Axios.post(`/api/v1/others/ImageUpload`, formData);
+  // Explicitly remove Content-Type in transformRequest so the browser sets
+  // multipart/form-data with the correct boundary — axios instance default
+  // (application/json) would otherwise override it and break multer.
+  const result = await Axios.post(`/api/v1/others/ImageUpload`, formData, {
+    transformRequest: [(data, headers) => {
+      delete headers["Content-Type"];
+      return data;
+    }],
+  });
   return result;
 };
 

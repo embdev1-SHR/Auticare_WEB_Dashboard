@@ -25,14 +25,19 @@ const fileAcceptMap = {
   Video: ["video/mp4", "video/quicktime", "video/x-msvideo"],
 };
 
-function MediaPreview({ url, type }) {
-  if (!url || !type) return null;
-  if (type === "Video") return <VideoPlayer file_src={url} overlays={[]} />;
+function MediaPreview({ url, type, poster, onPosterChange }) {
+  if (!url && type !== "Text") return (
+    <div className="text-muted text-center py-4" style={{ fontSize: 13 }}>
+      <i className="mdi mdi-image-off-outline d-block mb-1" style={{ fontSize: 28 }}></i>
+      No media file attached
+    </div>
+  );
+  if (type === "Video") return <VideoPlayer file_src={url} overlays={[]} poster={poster} onPosterChange={onPosterChange} />;
   if (type === "Image") return <ImageConfig url={url} />;
   if (type === "Audio") return <AudioConfig url={url} />;
   if (type === "Text") return (
     <div style={{ padding: "16px", background: "#f8f9fa", borderRadius: "8px", minHeight: "80px", fontSize: "14px", color: "#495057" }}>
-      {url}
+      {url || <span className="text-muted">No text content</span>}
     </div>
   );
   return null;
@@ -49,6 +54,7 @@ function ViewResource({ HomeSessionID, PatientId }) {
 
   const [mediaType, setMediaType] = useState(session ? { label: session.ResourceType, value: session.ResourceType } : null);
   const [url, setUrl] = useState(session?.ResourceURL ?? null);
+  const [thumbnail, setThumbnail] = useState(session?.ThumbnailURL ?? "");
   const [fileAccept, setFileAccept] = useState(session ? fileAcceptMap[session.ResourceType] || null : null);
   const [isAlertOpen, setIsAlertOpen] = useState(false);
 
@@ -56,6 +62,7 @@ function ViewResource({ HomeSessionID, PatientId }) {
     if (session) {
       setMediaType({ label: session.ResourceType, value: session.ResourceType });
       setUrl(session.ResourceURL);
+      setThumbnail(session.ThumbnailURL || "");
       setFileAccept(fileAcceptMap[session.ResourceType] || null);
     }
   }, [session?.HomeSessionID]);
@@ -72,6 +79,7 @@ function ViewResource({ HomeSessionID, PatientId }) {
       ResourceDescription: values.Description,
       ResourceType: values.MediaType,
       ResourceURL: values.Upload || session?.ResourceURL,
+      ThumbnailURL: thumbnail || null,
       Status: 1,
     };
     dispatch(updateHomeSession({ data: payload, HomeSessionID, PatientId }));
@@ -91,7 +99,7 @@ function ViewResource({ HomeSessionID, PatientId }) {
       onSubmit={onSubmit}
       enableReinitialize
     >
-      {({ errors, touched, handleSubmit, setFieldValue }) => (
+      {({ errors, touched, handleSubmit, setFieldValue, values }) => (
         <div className="session-detail-layout">
           {isAlertOpen && (
             <CloseSweetAlert
@@ -122,7 +130,12 @@ function ViewResource({ HomeSessionID, PatientId }) {
                 </div>
               </div>
 
-              <MediaPreview url={url} type={session.ResourceType} />
+              <MediaPreview
+                url={url}
+                type={session.ResourceType}
+                poster={thumbnail}
+                onPosterChange={IsEdit ? (val) => setThumbnail(val) : undefined}
+              />
             </CardBody>
           </Card>
 
@@ -160,7 +173,7 @@ function ViewResource({ HomeSessionID, PatientId }) {
 
                 {session.ResourceType !== "Text" && (
                   <div className="mb-3">
-                    <Label className="form-label">Replace File</Label>
+                    <Label className="form-label">Replace File <span className="text-muted" style={{ fontSize: 12, fontWeight: 400 }}>(optional)</span></Label>
                     <DropZoneForm
                       multiFiles={false}
                       fileData={async (files, setFV) => {
@@ -177,6 +190,28 @@ function ViewResource({ HomeSessionID, PatientId }) {
                       accept={fileAccept}
                       setFieldValue={setFieldValue}
                     />
+                  </div>
+                )}
+
+                {session.ResourceType === "Video" && (
+                  <div className="mb-3">
+                    <Label className="form-label">Thumbnail URL <span className="text-muted" style={{ fontSize: 12, fontWeight: 400 }}>(optional)</span></Label>
+                    <input
+                      type="url"
+                      className="form-control"
+                      placeholder="https://example.com/thumbnail.jpg"
+                      value={thumbnail}
+                      onChange={(e) => setThumbnail(e.target.value)}
+                    />
+                    {thumbnail && (
+                      <img
+                        src={thumbnail}
+                        alt="thumbnail preview"
+                        className="mt-2"
+                        style={{ height: 56, borderRadius: 6, objectFit: "cover" }}
+                        onError={(e) => { e.target.style.display = "none"; }}
+                      />
+                    )}
                   </div>
                 )}
 

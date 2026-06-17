@@ -5,13 +5,16 @@ import { publicHomeSessionViewService } from "../../services/patient.services";
 
 function MediaView({ session }) {
   const { ResourceType, ResourceURL, ResourceTitle } = session;
-  if (ResourceType === "Video" && ResourceURL) {
+  if (ResourceType === "Video") {
     return (
       <video
         controls
-        src={ResourceURL}
+        src={ResourceURL || undefined}
+        poster={session.ThumbnailURL || undefined}
         style={{ width: "100%", maxHeight: "480px", borderRadius: "12px", background: "#000" }}
-      />
+      >
+        {!ResourceURL && <p style={{ color: "#fff", textAlign: "center", padding: 24 }}>No video attached.</p>}
+      </video>
     );
   }
   if (ResourceType === "Audio" && ResourceURL) {
