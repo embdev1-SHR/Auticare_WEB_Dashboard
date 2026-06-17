@@ -137,6 +137,20 @@ export const homeSessionUpdateService = async (data) => {
   const result = await Axios.put(`/api/v1/homeSessions/${data.HomeSessionID.HomeSessionID || data.HomeSessionID}`, data.data);
   return result;
 };
+export const generateHomeSessionShareLinkService = async (HomeSessionID) => {
+  const result = await Axios.get(`/api/v1/homeSessions/share/generate/${HomeSessionID}`);
+  return result;
+};
+export const publicHomeSessionViewService = async (token) => {
+  // plain fetch — no auth header — using NEXT_PUBLIC_API_URL directly
+  const baseURL = process.env.NEXT_PUBLIC_API_URL || "";
+  const result = await fetch(`${baseURL}/api/v1/homeSessions/share/view?token=${encodeURIComponent(token)}`);
+  if (!result.ok) {
+    const body = await result.json().catch(() => ({}));
+    throw new Error(body?.errors?.message || "Failed to load session");
+  }
+  return result.json();
+};
 export const patientStartSessionService = async (payload) => {
   const result = await Axios.get(`/api/v1/patients/${payload.PatientId}/sessions/trials/${payload.SessionID}`);
   return result;
