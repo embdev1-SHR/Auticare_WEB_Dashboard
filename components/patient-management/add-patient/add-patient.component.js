@@ -142,6 +142,7 @@ function AddPatient() {
         validationSchema={PatientValidation(activeTab, {
           isTherapistManagementAccess,
           isCenterManagementAccess,
+          isCenter: UserData?.RoleName === "Center",
         })}
         onSubmit={onSubmit}
       >

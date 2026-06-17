@@ -2,7 +2,7 @@ import * as yup from "yup";
 import { PINCODES } from "../../../constants/regExp/pincode.regex";
 
 const PatientValidation = (tab,access) => {
-  const { isTherapistManagementAccess, isCenterManagementAccess } = access;
+  const { isTherapistManagementAccess, isCenterManagementAccess, isCenter } = access;
   switch (tab) {
     case 1:
       return yup.object().shape({
@@ -54,9 +54,9 @@ const PatientValidation = (tab,access) => {
       });
     case 4:
       return yup.object().shape({
-        Center: isCenterManagementAccess?yup.string().matches("").required("Please select a center"):null,
+        Center: isCenterManagementAccess ? yup.string().matches("").required("Please select a center") : null,
         Departments: yup.string().matches("").required("Please select department"),
-        Therapist: isTherapistManagementAccess?yup.string().matches("").required("Please select Therapist"):null,
+        Therapist: (!isCenter && isTherapistManagementAccess) ? yup.string().matches("").required("Please select Therapist") : yup.string().nullable(),
       });
     default:
       return yup.object().shape({
