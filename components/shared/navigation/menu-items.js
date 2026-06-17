@@ -37,6 +37,12 @@ export const Menuitems = [
     location: "store-enquiries",
   },
   {
+    tag: "StoreOrders",
+    title: "Store Orders",
+    icon: "ri-shopping-bag-line",
+    location: "store-orders",
+  },
+  {
     tag: "Resources",
     title: "Free Resources",
     icon: "dripicons-document",

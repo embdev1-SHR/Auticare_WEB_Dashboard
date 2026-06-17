@@ -49,3 +49,23 @@ export const AtStoreBulkCreateService = async (products) => {
     const result = await Axios.post(`/api/v1/products/bulk`, { products });
     return result;
 };
+
+export const storeOrderListService = async () => {
+    const result = await Axios.get(`/api/v1/storeOrders`);
+    return result;
+};
+
+export const storeOrderCreateService = async (data) => {
+    const result = await Axios.post(`/api/v1/storeOrders`, data);
+    return result;
+};
+
+export const storeOrderUpdateService = async (data) => {
+    const result = await Axios.put(`/api/v1/storeOrders/${data.StoreOrderID}`, { OrderStatus: data.OrderStatus });
+    return result;
+};
+
+export const storeOrderDeleteService = async (StoreOrderID) => {
+    const result = await Axios.delete(`/api/v1/storeOrders/${StoreOrderID}`);
+    return result;
+};

@@ -5,11 +5,12 @@ import { Col } from "reactstrap";
 import { selectRole } from "../../store/slice/auth.slice";
 import AtStoreActions from "./atStore-actions.component";
 import PlaceEnquiry from "./place-enquiry.component";
+import PlaceOrder from "./place-order.component";
 
 const ProductListItem = ({ product }) => {
   const { push } = useRouter();
   const role = useSelector(selectRole);
-  const canEnquire = role === "ClientAdmin" || role === "Center";
+  const canEnquire = role === "ClientAdmin" || role === "Center" || role === "Therapist";
 
   return (
     <Col xl='4' sm='6'>
@@ -36,8 +37,9 @@ const ProductListItem = ({ product }) => {
           </h5>
         </div>
         {canEnquire && (
-          <div className='text-center mt-2 mb-2'>
+          <div className='text-center mt-2 mb-2 d-flex justify-content-center gap-2 flex-wrap'>
             <PlaceEnquiry ProductId={product.ProductID} />
+            <PlaceOrder ProductId={product.ProductID} ProductName={product.ProductName} />
           </div>
         )}
       </div>

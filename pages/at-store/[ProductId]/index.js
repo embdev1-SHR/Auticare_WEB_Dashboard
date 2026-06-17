@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { Badge, Button, Card, CardBody, Col, Container, Nav, NavItem, NavLink, Row, TabContent, TabPane, Table } from "reactstrap";
 import PlaceEnquiry from "../../../components/at-store-management/place-enquiry.component";
+import PlaceOrder from "../../../components/at-store-management/place-order.component";
 import Layout from "../../../components/shared/layout";
 import PageTitle from "../../../components/shared/pagetitle";
 import { changeBreadcrumb, changeTitle } from "../../../store/slice/layout.slice";
@@ -25,26 +26,21 @@ const ProductDetails = () => {
   };
   const router = useRouter();
   const { ProductId } = router.query;
+  const dispatch = useDispatch();
   const role = useSelector(selectRole);
-  const product = useSelector(AtStoreDetail);
-  console.log("product",product);
+  const productList = useSelector(AtStoreDetail);
   const loading = useSelector(StoreIsLoading);
-  product = product[0]
-  const [url, setUrl] = useState(product?.ImageURL)
+  const product = productList[0];
+  const [url, setUrl] = useState(product?.ImageURL);
   const UserData = useSelector(selectUserData);
 
   const FunctionUrl = (URL) => {
-    setUrl(URL)
-  }
+    setUrl(URL);
+  };
 
   useEffect(() => {
     dispatch(AtStoreDetails(ProductId));
   }, [dispatch, ProductId]);
-
-
-
-
-  const dispatch = useDispatch();
   useEffect(() => {
     const breadcrumb_Items = [
       { title: "Dashboard", link: "/dashboard" },
@@ -149,9 +145,12 @@ const ProductDetails = () => {
                             </Col>
                             <Col xl='7'>
                               <div className='mt-4 mt-xl-3'>
-                                {role === "Therapist" ? (
-                                  <PlaceEnquiry ProductId={ProductId} />
-                                ) : null}
+                                {(role === "Therapist" || role === "ClientAdmin" || role === "Center") && (
+                                  <div className="d-flex gap-2 flex-wrap mb-2">
+                                    <PlaceEnquiry ProductId={ProductId} />
+                                    <PlaceOrder ProductId={ProductId} ProductName={product?.ProductName} />
+                                  </div>
+                                )}
                                 <a href='#' className='text-primary'>
                                   {product.Category}
                                 </a>

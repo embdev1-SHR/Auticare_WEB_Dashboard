@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { ToastNotification } from "../../components/shared/toast";
-import { AtStoreCreation, AtStoreDetailsService, AtStoreListService, AtStoreUpdateService, AtStoreDeleteService, AtStoreBulkCreateService, DeleteStoreEnquiryService, MarkAsReadService, storeCreation, storeEnquiryListService } from "../../services/store.services";
+import { AtStoreCreation, AtStoreDetailsService, AtStoreListService, AtStoreUpdateService, AtStoreDeleteService, AtStoreBulkCreateService, DeleteStoreEnquiryService, MarkAsReadService, storeCreation, storeEnquiryListService, storeOrderListService, storeOrderCreateService, storeOrderUpdateService, storeOrderDeleteService } from "../../services/store.services";
 
 
 
@@ -132,6 +132,56 @@ export const atStoreBulkCreate = createAsyncThunk("storeSlice/atStoreBulkCreate"
     }
 });
 
+export const storeOrderList = createAsyncThunk("storeSlice/storeOrderList", async () => {
+    try {
+        const res = await storeOrderListService();
+        return res.data.results.data;
+    } catch (error) {
+        console.log(error);
+        return error;
+    }
+});
+
+export const storeOrderCreate = createAsyncThunk("storeSlice/storeOrderCreate", async (payload) => {
+    try {
+        const res = await storeOrderCreateService(payload.data);
+        ToastNotification("success", "Order placed successfully");
+        payload.setOpen(false);
+        payload.resetForm();
+        return res.data.results.message;
+    } catch (error) {
+        console.log(error);
+        ToastNotification("error", "Failed to place order");
+        return error;
+    }
+});
+
+export const storeOrderUpdate = createAsyncThunk("storeSlice/storeOrderUpdate", async (data, thunkApi) => {
+    try {
+        const res = await storeOrderUpdateService(data);
+        ToastNotification("success", "Order status updated");
+        thunkApi.dispatch(storeOrderList());
+        return res.data.results.message;
+    } catch (error) {
+        console.log(error);
+        ToastNotification("error", "Failed to update order");
+        return error;
+    }
+});
+
+export const storeOrderDelete = createAsyncThunk("storeSlice/storeOrderDelete", async (StoreOrderID, thunkApi) => {
+    try {
+        const res = await storeOrderDeleteService(StoreOrderID);
+        ToastNotification("success", "Order deleted successfully");
+        thunkApi.dispatch(storeOrderList());
+        return res.data.results.message;
+    } catch (error) {
+        console.log(error);
+        ToastNotification("error", "Failed to delete order");
+        return error;
+    }
+});
+
 export const storeSlice = createSlice({
     name: "storeSlice",
     initialState: {
@@ -141,9 +191,9 @@ export const storeSlice = createSlice({
         AtStoreList: [],
         AtStoreDetailsData: [],
         IsEdit: false,
-        ProductID:[],
-        Edit:false
-
+        ProductID: [],
+        Edit: false,
+        orderList: [],
     },
     reducers: {
         setAtStoreEdit: (state, action) => {
@@ -244,6 +294,43 @@ export const storeSlice = createSlice({
             .addCase(atStoreBulkCreate.rejected, (state) => {
                 state.isMainPageLoading = false;
             })
+            .addCase(storeOrderList.pending, (state) => {
+                state.isMainPageLoading = true;
+            })
+            .addCase(storeOrderList.fulfilled, (state, action) => {
+                state.isMainPageLoading = false;
+                state.orderList = action.payload;
+            })
+            .addCase(storeOrderList.rejected, (state) => {
+                state.isMainPageLoading = false;
+            })
+            .addCase(storeOrderCreate.pending, (state) => {
+                state.isMainPageLoading = true;
+            })
+            .addCase(storeOrderCreate.fulfilled, (state) => {
+                state.isMainPageLoading = false;
+            })
+            .addCase(storeOrderCreate.rejected, (state) => {
+                state.isMainPageLoading = false;
+            })
+            .addCase(storeOrderUpdate.pending, (state) => {
+                state.isLoading = true;
+            })
+            .addCase(storeOrderUpdate.fulfilled, (state) => {
+                state.isLoading = false;
+            })
+            .addCase(storeOrderUpdate.rejected, (state) => {
+                state.isLoading = false;
+            })
+            .addCase(storeOrderDelete.pending, (state) => {
+                state.isLoading = true;
+            })
+            .addCase(storeOrderDelete.fulfilled, (state) => {
+                state.isLoading = false;
+            })
+            .addCase(storeOrderDelete.rejected, (state) => {
+                state.isLoading = false;
+            })
     },
 });
 
@@ -258,3 +345,4 @@ export const AtStoreDetail = (state) => state.storeSlice.AtStoreDetailsData;
 export const selectAtStoreIsEdit = (state) => state.storeSlice.IsEdit;
 export const selectAtStoreID = (state) => state.storeSlice.ProductID;
 export const StoreEdit = (state) => state.storeSlice.Edit;
+export const fetchAllOrderList = (state) => state.storeSlice.orderList;
