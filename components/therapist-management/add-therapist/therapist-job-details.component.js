@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Select from "react-select";
 import { Col, Label, Row } from "reactstrap";
-import { selectRoleBasedModules } from "../../../store/slice/auth.slice";
+import { selectRole, selectRoleBasedModules, selectUserData } from "../../../store/slice/auth.slice";
 import {
   getAllDepartments,
   selectDepartmentList,
@@ -11,7 +11,6 @@ import {
 import FACILITATORS from "../../../constants/facilitators.constant";
 
 function TherapistJobDetails() {
-  // Grab errors and touched from context
   const { errors, values, touched, setFieldValue } = useFormikContext();
   const dispatch = useDispatch();
   useEffect(() => {
@@ -19,6 +18,8 @@ function TherapistJobDetails() {
   }, []);
   const departments = useSelector(selectDepartmentList);
   const roleBasedModules = useSelector(selectRoleBasedModules);
+  const role = useSelector(selectRole);
+  const userData = useSelector(selectUserData);
   const departmentList = departments?.map((department) => {
     return { value: department.DepartmentID, label: department.DepartmentName };
   });
@@ -32,12 +33,29 @@ function TherapistJobDetails() {
       setFieldValue("FacilitatorType", values.TherapistType);
   }, [values.TherapistType]);
 
+  useEffect(() => {
+    if (role === "Center" && centers?.length > 0) {
+      const myCenter = centers.find((c) => c.UserID === userData?.UserID);
+      if (myCenter) setFieldValue("CenterID", myCenter.CenterID);
+    }
+  }, [role, centers, userData?.UserID]);
+
   return (
     <>
       <Row>
-        {roleBasedModules.some(
-          (module) => module.ModuleName === "CenterManagement"
-        ) ? (
+        {role === "Center" ? (
+          <Col lg="6">
+            <div className="mb-4">
+              <Label className="form-label" htmlFor="CenterID">Center</Label>
+              <input
+                type="text"
+                className="form-control bg-light"
+                readOnly
+                value={centers?.find((c) => c.UserID === userData?.UserID)?.CenterName || "Your Center"}
+              />
+            </div>
+          </Col>
+        ) : roleBasedModules.some((module) => module.ModuleName === "CenterManagement") ? (
           <Col lg="6">
             <div className="mb-4">
               <Label className="form-label required" htmlFor="CenterID">

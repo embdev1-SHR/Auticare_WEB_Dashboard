@@ -61,19 +61,15 @@ function AddTherapist() {
   };
   const isCenterManagementAvailable = roleBasedModules?.some((module) => module.ModuleName === "CenterManagement");
   const tog_standard = () => {
-    if (UserData.RoleName != "SuperAdmin") {
-      if (TherapistStatus.length >= UserData.SubscriptionPlan[0].NumberofTherapists) {
+    const plan = UserData.SubscriptionPlan?.[0];
+    if (UserData.RoleName !== "SuperAdmin" && plan?.NumberofTherapists != null) {
+      if (TherapistStatus.length >= plan.NumberofTherapists) {
         ToastNotification("error", "The number of therapists allowed in the subscription plan is already created");
-      }
-      else {
-        dispatch(setModalOpen(!setModalOpenState));
-        setActiveTab(1);
+        return;
       }
     }
-    else {
-      dispatch(setModalOpen(!setModalOpenState));
-      setActiveTab(1);
-    }
+    dispatch(setModalOpen(!setModalOpenState));
+    setActiveTab(1);
   };
 
   const toggleTab = (tab) => {
