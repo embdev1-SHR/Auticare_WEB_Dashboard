@@ -68,13 +68,13 @@ function AddMedia({ PatientId }) {
       }))
     }
     if (fileType == "Image") {
-      setFileType([".jpeg", ".jpg", ".png", ".gif"])
+      setFileType(["image/jpeg", "image/png", "image/gif"])
     }
     if (fileType == "Audio") {
-      setFileType([".mp3"])
+      setFileType(["audio/mpeg", "audio/mp3"])
     }
     if (fileType == "Video") {
-      setFileType([".mp4"])
+      setFileType(["video/mp4", "video/quicktime", "video/x-msvideo"])
     }
   };
 

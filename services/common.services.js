@@ -14,11 +14,9 @@ export const fetchAllStates = async (CountryID) => {
 };
 
 export const imageUpload = async (formData) => {
-  const result = await Axios.post(`/api/v1/others/ImageUpload`, formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
+  // Do NOT set Content-Type manually — axios detects FormData and sets multipart/form-data
+  // with the correct boundary automatically. Manual override loses the boundary and breaks multer.
+  const result = await Axios.post(`/api/v1/others/ImageUpload`, formData);
   return result;
 };
 

@@ -20,9 +20,9 @@ const typeOptions = [
 ];
 
 const fileAcceptMap = {
-  Image: [".jpeg", ".jpg", ".png", ".gif"],
-  Audio: [".mp3"],
-  Video: [".mp4"],
+  Image: ["image/jpeg", "image/png", "image/gif"],
+  Audio: ["audio/mpeg", "audio/mp3"],
+  Video: ["video/mp4", "video/quicktime", "video/x-msvideo"],
 };
 
 function MediaPreview({ url, type }) {

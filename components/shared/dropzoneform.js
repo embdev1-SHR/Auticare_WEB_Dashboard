@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useSelector } from "react-redux";
 import { selectUploadImageData } from "../../store/slice/common.slice";
 
-function DropZoneForm({ multiFiles, fileData, isUploading, displayName, accept=[".jpeg", ".jpg", ".png", ".gif"], setFieldValue=null }) {
+function DropZoneForm({ multiFiles, fileData, isUploading, displayName, accept=["image/jpeg", "image/png", "image/gif"], setFieldValue=null }) {
   const imageuploaded = useSelector(selectUploadImageData);
 
   const { getRootProps, getInputProps } = useDropzone({
