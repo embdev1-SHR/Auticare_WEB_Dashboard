@@ -17,6 +17,14 @@ const AddAppointment = () => {
   const patients = useSelector(selectPatientList);
   const therapists = useSelector(selectTherapistList);
 
+  const isPatient = role === "Patient";
+  const isTherapist = role === "Therapist";
+
+  // for therapist login, find their own record to pre-populate
+  const myTherapistRecord = isTherapist
+    ? therapists?.find((t) => t.UserID === userData?.UserID)
+    : null;
+
   const [modalOpen, setModalOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [slots, setSlots] = useState([]);
@@ -30,8 +38,6 @@ const AddAppointment = () => {
     AppointmentSlotID: "",
     ScheduledDate: "",
   });
-
-  const isPatient = role === "Patient";
 
   const patientOptions = patients?.map((p) => ({
     value: p.PatientID,
@@ -48,8 +54,28 @@ const AddAppointment = () => {
     label: `${moment(s.StartTime, "HH:mm:ss").format("hh:mm A")} - ${moment(s.EndTime, "HH:mm:ss").format("hh:mm A")}`,
   }));
 
+  // when therapist login opens modal, auto-load their slots
+  useEffect(() => {
+    if (modalOpen && isTherapist && myTherapistRecord?.TherapistID) {
+      loadSlots(myTherapistRecord.TherapistID);
+      setForm((f) => ({ ...f, TherapistID: myTherapistRecord.TherapistID }));
+    }
+  }, [modalOpen, isTherapist, myTherapistRecord?.TherapistID]);
+
+  const loadSlots = async (therapistId) => {
+    setSlotsLoading(true);
+    try {
+      const { data } = await fetchAppointmentSlotsByTherapistService(therapistId);
+      setSlots(data.results.data || []);
+    } catch {
+      setSlots([]);
+    } finally {
+      setSlotsLoading(false);
+    }
+  };
+
   const resetForm = () => {
-    setForm({ PatientID: "", TherapistID: "", AppointmentSlotID: "", ScheduledDate: "" });
+    setForm({ PatientID: "", TherapistID: isTherapist && myTherapistRecord ? myTherapistRecord.TherapistID : "", AppointmentSlotID: "", ScheduledDate: "" });
     setSlots([]);
     setCreatedAppointment(null);
     setCopied(false);
@@ -62,15 +88,7 @@ const AddAppointment = () => {
 
   const handleTherapistChange = async (option) => {
     setForm((f) => ({ ...f, TherapistID: option.value, AppointmentSlotID: "" }));
-    setSlotsLoading(true);
-    try {
-      const { data } = await fetchAppointmentSlotsByTherapistService(option.value);
-      setSlots(data.results.data || []);
-    } catch {
-      setSlots([]);
-    } finally {
-      setSlotsLoading(false);
-    }
+    await loadSlots(option.value);
   };
 
   const handleSubmit = async () => {
@@ -121,6 +139,10 @@ const AddAppointment = () => {
     }
   };
 
+  const myTherapistLabel = myTherapistRecord
+    ? `${myTherapistRecord.Salutation ? myTherapistRecord.Salutation + " " : ""}${myTherapistRecord.Name || myTherapistRecord.UserName || ""}`
+    : "";
+
   return (
     <>
       <Button color="primary" className="waves-effect waves-light" onClick={toggle}>
@@ -160,25 +182,33 @@ const AddAppointment = () => {
                   />
                 </FormGroup>
               )}
+
               <FormGroup>
                 <Label className="required">Therapist</Label>
-                <Select
-                  options={therapistOptions}
-                  placeholder="Select therapist"
-                  onChange={handleTherapistChange}
-                  styles={{ control: (s) => ({ ...s, borderColor: "#e8eaed", borderRadius: "0.375rem" }) }}
-                />
+                {isTherapist ? (
+                  <Input type="text" className="bg-light" readOnly value={myTherapistLabel} />
+                ) : (
+                  <Select
+                    options={therapistOptions}
+                    placeholder="Select therapist"
+                    onChange={handleTherapistChange}
+                    styles={{ control: (s) => ({ ...s, borderColor: "#e8eaed", borderRadius: "0.375rem" }) }}
+                  />
+                )}
               </FormGroup>
+
               <FormGroup>
                 <Label className="required">Appointment Slot</Label>
                 <Select
                   options={slotOptions}
-                  placeholder={slotsLoading ? "Loading slots..." : form.TherapistID ? "Select slot" : "Select therapist first"}
+                  value={form.AppointmentSlotID ? slotOptions.find((o) => o.value === form.AppointmentSlotID) || null : null}
+                  placeholder={slotsLoading ? "Loading slots..." : form.TherapistID ? (slotOptions.length === 0 ? "No slots available" : "Select slot") : "Select therapist first"}
                   isDisabled={!form.TherapistID || slotsLoading}
                   onChange={(opt) => setForm((f) => ({ ...f, AppointmentSlotID: opt.value }))}
                   styles={{ control: (s) => ({ ...s, borderColor: "#e8eaed", borderRadius: "0.375rem" }) }}
                 />
               </FormGroup>
+
               <FormGroup>
                 <Label className="required">Scheduled Date</Label>
                 <Input
