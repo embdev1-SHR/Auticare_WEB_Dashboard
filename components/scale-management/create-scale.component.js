@@ -63,6 +63,7 @@ function CreateScale() {
 
   useEffect(() => {
     dispatch(fetchAllSkills());
+    if (trivandrumMode) return; // preserve Trivandrum pre-set values
     if (isEdit) {
       setScaleInitial(
         {
@@ -88,7 +89,7 @@ function CreateScale() {
         }
       )
     }
-  }, [ScaleID, isEdit, InitialScaleDetails]);
+  }, [ScaleID, isEdit, InitialScaleDetails, trivandrumMode]);
 
   const skillList = useSelector(selectSkillList);
   const [skillOptions, setSkillOptions] = useState([]);
@@ -254,9 +255,8 @@ function CreateScale() {
         "ScaleCategory": values.ScaleCategory,
         "ScaleMetric": values.ScaleMetric,
         "ScaleMetricType": values.ScaleMetricType,
-        "SkillIDs": values.Skills.map(item => item.value)
+        "SkillIDs": trivandrumMode ? [] : values.Skills.map(item => item.value)
       }
-      console.log("data",data);
       dispatch(createScale(data));
     }
   };
@@ -285,7 +285,7 @@ function CreateScale() {
         Create Trivandrum Scale
       </Button>
 
-      <Formik initialValues={scaleInitial} validationSchema={isEdit ? validationSchemaWithOutSkill : validationSchema} onSubmit={submit} enableReinitialize={true}>
+      <Formik initialValues={scaleInitial} validationSchema={isEdit || trivandrumMode ? validationSchemaWithOutSkill : validationSchema} onSubmit={submit} enableReinitialize={true}>
         {({ touched, errors, handleSubmit, setFieldValue, isSubmitting, resetForm, values }) => (
           <Modal
             isOpen={setModalOpenState}
@@ -407,22 +407,24 @@ function CreateScale() {
                   </div>
                 </Col>
               </Row>
-              <div className='mb-4'>
-                <Label className='form-label required' htmlFor='regions'>
-                  Skills
-                </Label>
-                <Field
-                  component={Select}
-                  name='Skills'
-                  value={isEdit ? skillIntialOptions : selectedSkills}
-                  isDisabled={isEdit}
-                  isMulti={true}
-                  onChange={(selectedOption) => handleMultiple(selectedOption, setFieldValue)}
-                  options={skillOptions}
-                  classNamePrefix='select2-selection'
-                />
-                {errors.Skills && touched.Skills ? <ErrorMessage className='text-danger small' name='Skills' component='div' /> : null}
-              </div>
+              {!trivandrumMode && (
+                <div className='mb-4'>
+                  <Label className='form-label required' htmlFor='regions'>
+                    Skills
+                  </Label>
+                  <Field
+                    component={Select}
+                    name='Skills'
+                    value={isEdit ? skillIntialOptions : selectedSkills}
+                    isDisabled={isEdit}
+                    isMulti={true}
+                    onChange={(selectedOption) => handleMultiple(selectedOption, setFieldValue)}
+                    options={skillOptions}
+                    classNamePrefix='select2-selection'
+                  />
+                  {errors.Skills && touched.Skills ? <ErrorMessage className='text-danger small' name='Skills' component='div' /> : null}
+                </div>
+              )}
 
               {/* <div className='mb-4'>
                 <Label className='form-label required' htmlFor='regions'>

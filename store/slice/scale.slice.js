@@ -131,10 +131,8 @@ export const createScale = createAsyncThunk(
       ToastNotification("success", "Added Successfully");
       return res.data.results.message;
     } catch (error) {
-      const message = error.responce.data.message;
+      const message = error?.response?.data?.errors?.message || "Failed to add scale";
       ToastNotification("error", message);
-      // console.log("error from scale",error);
-      // ToastNotification("error", "Failed to add scale");
       return error;
     }
   }
