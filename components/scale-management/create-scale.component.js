@@ -51,7 +51,15 @@ function CreateScale() {
   useEffect(() => {
     dispatch(ScaleDetails(ScaleID));
     dispatch(ScaleSkill(ScaleID));
-  }, [ScaleID, dispatch, setModalOpenState])
+  }, [ScaleID, dispatch, setModalOpenState]);
+
+  // Reset trivandrumMode whenever the modal closes (including thunk-triggered closes)
+  useEffect(() => {
+    if (!setModalOpenState) {
+      setTrivandrumMode(false);
+      setCreatingFor("");
+    }
+  }, [setModalOpenState]);
 
   useEffect(() => {
     dispatch(fetchAllSkills());
@@ -141,6 +149,9 @@ function CreateScale() {
   const tog_standard = () => {
     dispatch(isEditScale(false));
     setTrivandrumMode(false);
+    setCreatingFor("");
+    setScaleType(null);
+    setScaleInitial(initials);
     if (UserData.RoleName != "SuperAdmin") {
       if (SelectScaleByType.length >= UserData.SubscriptionPlan[0].NumberofCustomScales) {
         ToastNotification("error", "The number of scales allowed in the subscription plan is already created");

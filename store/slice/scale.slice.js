@@ -299,6 +299,7 @@ export const ScaleUpdate = createAsyncThunk(
       ToastNotification("success", "Scale Updated Successfully");
       await thunkApi.dispatch(fetchAllScales());
       await thunkApi.dispatch(setModalOpen(false));
+      thunkApi.dispatch(isEditScale(false));
       return res.data.results.message;
     } catch (error) {
       ToastNotification("error", "Scale Update Failed ");
