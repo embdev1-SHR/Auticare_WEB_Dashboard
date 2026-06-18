@@ -25,6 +25,7 @@ function CreateScale() {
   const [selectedSkills, setSelectedSkills] = useState(null);
   const [creatingFor, setCreatingFor] = useState("");
   const [scaleType, setScaleType] = useState("");
+  const [trivandrumMode, setTrivandrumMode] = useState(false);
 
   const initials = {
     ScaleName: "",
@@ -126,31 +127,45 @@ function CreateScale() {
   const typeOptions = {
     Screening: [
       { label: "ISSA", value: "ISSA" },
-      { label: "CARS-ST", value: "disabled", },
-      { label: "CARS-HT", value: "disabled", },
+      { label: "Trivandrum", value: "Trivandrum" },
+      { label: "CARS-ST", value: "disabled" },
+      { label: "CARS-HT", value: "disabled" },
     ],
 
     Assessment: [
       { label: "ABLLS", value: "ABLLS" },
-      { label: "ABLLS-2", value: "disabled", },
-      { label: "ABLLS-3", value: "disabled", },
+      { label: "ABLLS-2", value: "disabled" },
+      { label: "ABLLS-3", value: "disabled" },
     ],
   };
   const tog_standard = () => {
     dispatch(isEditScale(false));
-console.log("UserData",UserData);
-console.log("SelectScaleByType",SelectScaleByType);
+    setTrivandrumMode(false);
     if (UserData.RoleName != "SuperAdmin") {
       if (SelectScaleByType.length >= UserData.SubscriptionPlan[0].NumberofCustomScales) {
         ToastNotification("error", "The number of scales allowed in the subscription plan is already created");
-      }
-      else {
+      } else {
         dispatch(setModalOpen(!setModalOpenState));
       }
-    }
-    else {
+    } else {
       dispatch(setModalOpen(!setModalOpenState));
     }
+  };
+
+  const tog_trivandrum = () => {
+    dispatch(isEditScale(false));
+    setTrivandrumMode(true);
+    setCreatingFor("Screening");
+    setScaleType({ label: "Trivandrum", value: "Trivandrum" });
+    setScaleInitial({
+      ScaleName: "",
+      Accreditation: "",
+      ScaleCategory: "",
+      ScaleMetric: "Screening",
+      Skills: [],
+      ScaleMetricType: "Trivandrum",
+    });
+    dispatch(setModalOpen(true));
   };
 
   // const handleRegion = (selectedRegion, setFieldValue) => {
@@ -238,14 +253,13 @@ console.log("SelectScaleByType",SelectScaleByType);
   // close modal alert
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const onHandleCloseConfirm = async () => {
-    console.log("trigger");
     dispatch(isEditScale(false));
     setSelectedSkills(null);
-    // setSelectedRegion(null);
     setScaleType(null);
+    setTrivandrumMode(false);
+    setCreatingFor("");
     setIsAlertOpen(false);
-    tog_standard();
-
+    dispatch(setModalOpen(false));
   };
   const onCloseAlert = () => {
     setIsAlertOpen(false);
@@ -253,8 +267,11 @@ console.log("SelectScaleByType",SelectScaleByType);
 
   return (
     <>
-      <Button type='button' onClick={tog_standard} color='primary' className='waves-effect waves-light'>
+      <Button type='button' onClick={tog_standard} color='primary' className='waves-effect waves-light me-2'>
         Create scale
+      </Button>
+      <Button type='button' onClick={tog_trivandrum} color='success' className='waves-effect waves-light'>
+        Create Trivandrum Scale
       </Button>
 
       <Formik initialValues={scaleInitial} validationSchema={isEdit ? validationSchemaWithOutSkill : validationSchema} onSubmit={submit} enableReinitialize={true}>
@@ -275,7 +292,7 @@ console.log("SelectScaleByType",SelectScaleByType);
               toggle={() => {
                 setIsAlertOpen(true);
               }}>
-              {isEdit ? "Edit Scale" : "Create scale "}
+              {isEdit ? "Edit Scale" : trivandrumMode ? "Create Trivandrum Scale" : "Create Scale"}
             </ModalHeader>
             <ModalBody>
               <div className='mb-4'>
@@ -327,8 +344,7 @@ console.log("SelectScaleByType",SelectScaleByType);
                           type='radio'
                           id='Screening'
                           name='ScaleMetric'
-                          disabled={isEdit}
-
+                          disabled={isEdit || trivandrumMode}
                           className='custom-control-Input form-check-input'
                           onChange={() => {
                             handleCreatingFor(setFieldValue);
@@ -343,8 +359,7 @@ console.log("SelectScaleByType",SelectScaleByType);
                         <Field
                           type='radio'
                           id='Assessment'
-                          disabled={isEdit}
-
+                          disabled={isEdit || trivandrumMode}
                           name='ScaleMetric'
                           className='custom-control-Input form-check-input'
                           onChange={() => {
@@ -373,10 +388,8 @@ console.log("SelectScaleByType",SelectScaleByType);
                         handleType(selectedOption, setFieldValue);
                       }}
                       options={typeOptions[creatingFor]}
-                      isDisabled={isEdit}
-                      isOptionDisabled={(option) =>
-                        option.value === "disabled"}
-
+                      isDisabled={isEdit || trivandrumMode}
+                      isOptionDisabled={(option) => option.value === "disabled"}
                       classNamePrefix='select2-selection'
                     />
                     {errors.ScaleMetricType && touched.ScaleMetricType ? <ErrorMessage className='text-danger small' name='ScaleMetricType' component='div' /> : null}
