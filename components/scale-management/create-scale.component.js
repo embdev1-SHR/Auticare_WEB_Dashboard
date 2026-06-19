@@ -137,8 +137,9 @@ function CreateScale() {
     Screening: [
       { label: "ISSA", value: "ISSA" },
       { label: "Trivandrum", value: "Trivandrum" },
-      { label: "CARS-ST", value: "disabled" },
-      { label: "CARS-HT", value: "disabled" },
+      { label: "CARS-ST", value: "CARS-ST" },
+      { label: "CARS-HT", value: "CARS-HT" },
+      { label: "M-CHAT-R", value: "M-CHAT-R" },
     ],
 
     Assessment: [
@@ -208,7 +209,7 @@ function CreateScale() {
     ScaleCategory: Yup.string().required("Please select a scale category"),
     ScaleMetric: Yup.string().required("Please select a scale metric"),
     Skills: Yup.array().min(1, "Please select skills"),
-    ScaleMetricType: Yup.string().matches("").required("Please select a scale type"),
+    ScaleMetricType: Yup.string().required("Please select a scale type"),
     // Regions: Yup.array().min(1, "Please select a regions"),
   });
 
@@ -217,7 +218,7 @@ function CreateScale() {
     Accreditation: Yup.string().max(200, "Too Long!").required("Please enter a accreditation"),
     ScaleCategory: Yup.string().required("Please select a scale category"),
     ScaleMetric: Yup.string().required("Please select a scale metric"),
-    ScaleMetricType: Yup.string().matches("").required("Please select a scale type"),
+    ScaleMetricType: Yup.string().required("Please select a scale type"),
     // Regions: Yup.array().min(1, "Please select a regions"),
   });
 
@@ -313,7 +314,6 @@ function CreateScale() {
                 <Field type='text' name='ScaleName' className='form-control' id='scale-name' placeholder='Enter scale name' />
                 {errors.ScaleName && touched.ScaleName ? <ErrorMessage className='text-danger small' name='ScaleName' component='div' /> : null}
               </div>
-              {console.log("formik values", values)}
               <Row>
                 <Col lg='6'>
                   <div className='mb-4'>
