@@ -371,6 +371,9 @@ export const scaleSlice = createSlice({
         Edit: action.payload,
       };
     },
+    resetScaleCreating: (state) => {
+      state.isScaleCreating = false;
+    },
     currentScale: (state, action) => {
       return {
         ...state,
@@ -527,7 +530,7 @@ export const scaleSlice = createSlice({
       })
   },
 });
-export const { setViewUpdateModal, setUpdateData, StateActiveTap, isEditScale, currentScale, ActiveTab } = scaleSlice.actions;
+export const { setViewUpdateModal, setUpdateData, StateActiveTap, isEditScale, currentScale, ActiveTab, resetScaleCreating } = scaleSlice.actions;
 export const selectScaleList = (state) => state.scale.scales;
 export const selectByScaleIDCategory = (state) => state.scale.categoriesByScaleID;
 export const selectQuestion = (state) => state.scale.questions;

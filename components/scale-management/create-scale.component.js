@@ -6,7 +6,7 @@ import { setModalOpen, selectSetModalOpenState } from "../../store/slice/layout.
 import Select from "react-select";
 import { fetchAllSkills, selectSkillList } from "../../store/slice/skills.slice";
 import { getAllCountries, getAllRegion, selectCountries, selectRegions } from "../../store/slice/common.slice";
-import { createScale, selectScaleEdit, selectScaleList, isEditScale, ScaleDetails, selectCurrentScaleId, selectScaleDetail, ScaleSkill, selectScaleData, ScaleUpdate, selectScaleIsLoading, selectScaleCreating } from "../../store/slice/scale.slice";
+import { createScale, selectScaleEdit, selectScaleList, isEditScale, ScaleDetails, selectCurrentScaleId, selectScaleDetail, ScaleSkill, selectScaleData, ScaleUpdate, selectScaleIsLoading, selectScaleCreating, resetScaleCreating } from "../../store/slice/scale.slice";
 
 import * as Yup from "yup";
 import { Formik, Field, ErrorMessage } from "formik";
@@ -77,18 +77,8 @@ function CreateScale() {
       )
       setScaleType({ label: InitialScaleDetails?.ScaleMetricType, value: InitialScaleDetails?.ScaleMetricType });
     }
-    else {
-      setScaleInitial(
-        {
-          ScaleName: "",
-          Accreditation: "",
-          ScaleCategory: "",
-          ScaleMetric: "",
-          Skills: [],
-          ScaleMetricType: "",
-        }
-      )
-    }
+    // Create mode: tog_standard() already resets scaleInitial to empty — no reset here to
+    // avoid wiping user's in-progress values when ScaleDetails async fetch completes.
   }, [ScaleID, isEdit, InitialScaleDetails, trivandrumMode]);
 
   const skillList = useSelector(selectSkillList);
@@ -149,6 +139,7 @@ function CreateScale() {
     ],
   };
   const tog_standard = () => {
+    dispatch(resetScaleCreating());
     dispatch(isEditScale(false));
     setTrivandrumMode(false);
     setCreatingFor("");
@@ -166,6 +157,7 @@ function CreateScale() {
   };
 
   const tog_trivandrum = () => {
+    dispatch(resetScaleCreating());
     dispatch(isEditScale(false));
     setTrivandrumMode(true);
     setCreatingFor("Screening");
