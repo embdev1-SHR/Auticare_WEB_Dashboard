@@ -131,9 +131,10 @@ export const createScale = createAsyncThunk(
       ToastNotification("success", "Added Successfully");
       return res.data.results.message;
     } catch (error) {
-      const message = error?.response?.data?.errors?.message || "Failed to add scale";
+      // For 500s the Axios interceptor rejects with error.response.data directly (no .response wrapper)
+      const message = error?.response?.data?.errors?.message || error?.errors?.message || "Failed to add scale";
       ToastNotification("error", message);
-      return error;
+      return thunkApi.rejectWithValue(message);
     }
   }
 );
