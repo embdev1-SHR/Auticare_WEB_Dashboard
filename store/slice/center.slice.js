@@ -9,6 +9,7 @@ import {
   fetchPendingCentersService,
   approveCenterService,
   rejectCenterService,
+  regenerateCenterApiKeyService,
 } from "../../services/center.services";
 
 import { setModalOpen } from "./layout.slice";
@@ -134,6 +135,22 @@ export const rejectCenter = createAsyncThunk(
       return res.data.results.message;
     } catch (error) {
       ToastNotification("error", "Failed to reject registration");
+      return thunkApi.rejectWithValue(error.message);
+    }
+  }
+);
+
+export const regenerateCenterApiKey = createAsyncThunk(
+  "center/regenerateCenterApiKey",
+  async (CenterID, thunkApi) => {
+    try {
+      const res = await regenerateCenterApiKeyService(CenterID);
+      const newKey = res.data.results.data.CenterApiKey;
+      ToastNotification("success", "API key regenerated successfully");
+      thunkApi.dispatch(SelectCenter(CenterID));
+      return newKey;
+    } catch (error) {
+      ToastNotification("error", "Failed to regenerate API key");
       return thunkApi.rejectWithValue(error.message);
     }
   }

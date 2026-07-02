@@ -124,11 +124,19 @@ export const getUserData = createAsyncThunk("auth/getUserData", async (args, thu
     const RefreshTokenValue = await getRefreshToken();
     if (RefreshTokenValue) {
       const { data } = await Axios.get(`/api/v1/users/details`);
+<<<<<<< Updated upstream
       const SubscriptionPlan = data.results.data.SubscriptionPlan
       if (SubscriptionPlan && SubscriptionPlan.length > 0) {
         const endDate = SubscriptionPlan[SubscriptionPlan.length - 1].SubcriptionPlanEndDate
         const SubscriptionPlanEndDate = Date.parse(endDate)
         const currentDate = Date.parse(new Date())
+=======
+      const SubscriptionPlan = data.results.data.SubscriptionPlan;
+      if (SubscriptionPlan && SubscriptionPlan.length > 0) {
+        const endDate = SubscriptionPlan[SubscriptionPlan.length - 1].SubcriptionPlanEndDate;
+        const SubscriptionPlanEndDate = Date.parse(endDate);
+        const currentDate = Date.parse(new Date());
+>>>>>>> Stashed changes
         if (currentDate > SubscriptionPlanEndDate) {
           return Router.push("subscription-expired");
         } else {
@@ -142,7 +150,7 @@ export const getUserData = createAsyncThunk("auth/getUserData", async (args, thu
     } else return;
   } catch (error) {
     console.log(error);
-    const message = error.response.data.errors.message;
+    const message = error?.response?.data?.errors?.message || error?.message || "Authentication error";
     return thunkAPI.rejectWithValue(message);
   }
 });

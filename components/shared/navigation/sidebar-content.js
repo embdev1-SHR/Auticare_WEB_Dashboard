@@ -5,12 +5,13 @@ import { useRouter } from "next/router";
 import MetisMenu from "metismenujs";
 import { useEffect } from "react";
 import { useSelector } from "react-redux";
-import { selectRoleBasedModules } from "../../../store/slice/auth.slice";
+import { selectRoleBasedModules, selectRole } from "../../../store/slice/auth.slice";
 import SidebarSkeleton from "./sidebar-skeleton";
 
 function SidebarContent(props) {
   const router = useRouter();
   const roleBasedModules = useSelector(selectRoleBasedModules);
+  const role = useSelector(selectRole);
   useEffect(() => {
     new MetisMenu("#side-menu");
 
@@ -62,11 +63,16 @@ function SidebarContent(props) {
         {!roleBasedModules ? (
           <SidebarSkeleton /> // TODO: Add Shimmer Effect
         ) : (
-          Menuitems.map((menu, key) => {
-            if (roleBasedModules.some((module) => module.ModuleName === menu.tag)) {
-              return <SidebarListitem key={key} title={menu.title} location={menu.location} iconClass={menu.icon} />;
-            }
-          })
+          <>
+            {Menuitems.map((menu, key) => {
+              if (roleBasedModules.some((module) => module.ModuleName === menu.tag)) {
+                return <SidebarListitem key={key} title={menu.title} location={menu.location} iconClass={menu.icon} />;
+              }
+            })}
+            {role === "ClientAdmin" && (
+              <SidebarListitem title="Blueroom" location="blueroom" iconClass="ri-tv-line" />
+            )}
+          </>
         )}
       </ul>
     </div>

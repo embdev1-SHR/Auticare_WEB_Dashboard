@@ -14,6 +14,7 @@ import {
   selectCenterIsEdit,
   setCenterEdit,
   updateCenter,
+  regenerateCenterApiKey,
 } from "../../store/slice/center.slice";
 import {
   getAllStates,
@@ -51,6 +52,21 @@ function ViewCenterDetails() {
 
 
   const [countryCode, setCountryCode] = useState("in");
+  const [apiKeyCopied, setApiKeyCopied] = useState(false);
+
+  const handleCopyApiKey = () => {
+    if (center?.CenterApiKey) {
+      navigator.clipboard.writeText(center.CenterApiKey);
+      setApiKeyCopied(true);
+      setTimeout(() => setApiKeyCopied(false), 2000);
+    }
+  };
+
+  const handleRegenerateApiKey = async () => {
+    if (window.confirm("Regenerate this center's API key? The old key will stop working immediately.")) {
+      await dispatch(regenerateCenterApiKey(center.CenterID));
+    }
+  };
   const [initialValueSet, setInitialValueSet] = useState({ value: center?.ClientID, label: center?.ClientName });
 
   const clientID = useSelector(selectClientList);
@@ -178,47 +194,84 @@ function ViewCenterDetails() {
                   />
                 ) : null}
               </div>
-              {!isEdit ?
-                <Row>
-                  <Col>
-                    <div className="mb-4">
-                      <Label className="form-label" htmlFor="center-id">
-                        Center ID
-                      </Label>
-                      <Field
-                        type="number"
-                        name="CenterID"
-                        className="form-control"
-                        id="center-id"
-                        disabled
-                      />
-                    </div>
-                  </Col>
-                  <Col>
-                    <div className="mb-4">
-                      <Label
-                        className={isEdit ? "form-label required" : "form-label"}
-                        htmlFor="ClientID"
-                        disabled
-                      >
-                        Client ID
-                      </Label>
-                      <Field disabled className="form-control" name="ClientID" />
-                    </div>
-                  </Col>
-                  <Col>
-                    <div className="mb-4">
-                      <Label
-                        className={isEdit ? "form-label required" : "form-label"}
-                        htmlFor="ClientName"
-                        disabled
-                      >
-                        Client Name
-                      </Label>
-                      <Field disabled className="form-control" name="ClientName" />
-                    </div>
-                  </Col>
-                </Row> : UserData.RoleName === "SuperAdmin" ?
+              {!isEdit ? (
+                <>
+                  <Row>
+                    <Col>
+                      <div className="mb-4">
+                        <Label className="form-label" htmlFor="center-id">
+                          Center ID
+                        </Label>
+                        <Field
+                          type="number"
+                          name="CenterID"
+                          className="form-control"
+                          id="center-id"
+                          disabled
+                        />
+                      </div>
+                    </Col>
+                    <Col>
+                      <div className="mb-4">
+                        <Label
+                          className="form-label"
+                          htmlFor="ClientID"
+                        >
+                          Client ID
+                        </Label>
+                        <Field disabled className="form-control" name="ClientID" />
+                      </div>
+                    </Col>
+                    <Col>
+                      <div className="mb-4">
+                        <Label
+                          className="form-label"
+                          htmlFor="ClientName"
+                        >
+                          Client Name
+                        </Label>
+                        <Field disabled className="form-control" name="ClientName" />
+                      </div>
+                    </Col>
+                  </Row>
+                  {center?.CenterApiKey && (
+                    <Row>
+                      <Col>
+                        <div className="mb-4">
+                          <Label className="form-label">Center API Key</Label>
+                          <div className="d-flex align-items-center gap-2">
+                            <input
+                              type="text"
+                              readOnly
+                              value={center.CenterApiKey}
+                              className="form-control font-monospace"
+                              style={{ fontSize: "0.8rem", letterSpacing: "0.03em" }}
+                            />
+                            <Button
+                              color="secondary"
+                              size="sm"
+                              onClick={handleCopyApiKey}
+                              style={{ whiteSpace: "nowrap" }}
+                            >
+                              {apiKeyCopied ? "Copied!" : "Copy"}
+                            </Button>
+                            {UserData?.RoleName === "SuperAdmin" && (
+                              <Button
+                                color="warning"
+                                size="sm"
+                                onClick={handleRegenerateApiKey}
+                                style={{ whiteSpace: "nowrap" }}
+                              >
+                                Regenerate
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      </Col>
+                    </Row>
+                  )}
+                </>
+              ) : UserData.RoleName === "SuperAdmin" ?
                   // <div className="mb-4">
                   //   <Label className="form-label required" htmlFor="Client-ID">
                   //     Client

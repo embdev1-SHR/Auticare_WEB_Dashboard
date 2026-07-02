@@ -40,3 +40,8 @@ export const rejectCenterService = async (UserID) => {
   const result = await Axios.delete(`/api/v1/auth/reject-center/${UserID}`);
   return result;
 };
+
+export const regenerateCenterApiKeyService = async (CenterID) => {
+  const result = await Axios.post(`/api/v1/centers/${CenterID}/regenerate-api-key`);
+  return result;
+};

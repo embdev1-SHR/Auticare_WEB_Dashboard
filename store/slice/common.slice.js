@@ -71,7 +71,7 @@ export const getDashboard = createAsyncThunk("common/getDashboard", async (args,
     return results;
   } catch (error) {
     console.log(error);
-    const message = error.response.data.errors.message;
+    const message = error?.response?.data?.errors?.message || error?.message || "Failed to load dashboard";
     return thunkApi.rejectWithValue(message);
   }
 });
