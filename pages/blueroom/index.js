@@ -9,6 +9,7 @@ import {
   getClassStudentsService,
   getActivityService, getHeatmapService, getTimeSeriesService,
   getLiveSessionsService, getSessionDetailService, getPatientSessionsService,
+  getRecentSessionsService,
 } from "../../services/blueroom.services";
 import { fetchAllCentersService } from "../../services/center.services";
 import SessionDetailModal from "../../components/blueroom/session-detail-modal";
@@ -52,6 +53,10 @@ function BlueroomPage() {
   const [liveSessions, setLiveSessions] = useState([]);
   const [openSessionId, setOpenSessionId] = useState(null);
 
+  // Session reports (past sessions)
+  const [reports, setReports] = useState([]);
+  const [reportSearch, setReportSearch] = useState("");
+
   const canvasRef = useRef(null);
 
   useEffect(() => {
@@ -90,6 +95,22 @@ function BlueroomPage() {
     const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
     return (h ? `${h}h ` : "") + (m ? `${m}m ` : "") + `${sec}s`;
   };
+
+  async function loadReports() {
+    if (isAdmin && !selectedCenter) { setReports([]); return; }
+    try {
+      const params = { limit: 100 };
+      if (isAdmin && selectedCenter) params.centerID = selectedCenter;
+      if (reportSearch) params.search = reportSearch;
+      const r = await getRecentSessionsService(params);
+      setReports(r.data?.results?.data || []);
+    } catch (_) {}
+  }
+
+  // Reload the reports list when center or search changes (and after modal closes).
+  useEffect(() => {
+    loadReports();
+  }, [selectedCenter, isAdmin, reportSearch, openSessionId]);
 
   async function loadClasses() {
     setClassLoading(true);
@@ -282,6 +303,73 @@ function BlueroomPage() {
                               </div>
                             </div>
                           ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* ── Session Reports (past sessions per patient) ──────────────── */}
+              <div className="row mb-4">
+                <div className="col-12">
+                  <div className="card">
+                    <div className="card-body">
+                      <div className="d-flex align-items-center mb-3 flex-wrap gap-2">
+                        <h5 className="card-title mb-0">Session Reports</h5>
+                        <span className="badge bg-secondary">{reports.length}</span>
+                        <input
+                          type="text"
+                          className="form-control form-control-sm ms-auto"
+                          style={{ maxWidth: 260 }}
+                          placeholder="Search by patient name…"
+                          value={reportSearch}
+                          onChange={(e) => setReportSearch(e.target.value)}
+                        />
+                      </div>
+                      {reports.length === 0 ? (
+                        <p className="text-muted small mb-0">No sessions recorded yet. Completed sessions appear here as reports.</p>
+                      ) : (
+                        <div style={{ maxHeight: 360, overflowY: "auto" }}>
+                          <table className="table table-sm table-hover mb-0">
+                            <thead className="table-light" style={{ position: "sticky", top: 0 }}>
+                              <tr>
+                                <th>Patient / Class</th>
+                                <th>Mode</th>
+                                <th>Date</th>
+                                <th>Duration</th>
+                                <th>Activities</th>
+                                <th>Touches</th>
+                                <th>Status</th>
+                                <th></th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {reports.map((s) => (
+                                <tr key={s.session_id} style={{ cursor: "pointer" }} onClick={() => setOpenSessionId(s.session_id)}>
+                                  <td className="fw-bold">
+                                    {s.session_mode === "individual"
+                                      ? (s.patient_name || `Patient #${s.patient_id}`)
+                                      : (s.class_name || "Class session")}
+                                    {s.session_mode === "individual" && s.class_name && (
+                                      <div className="text-muted small fw-normal">{s.class_name}</div>
+                                    )}
+                                  </td>
+                                  <td><span className={`badge ${s.session_mode === "individual" ? "bg-info" : "bg-warning text-dark"}`}>{s.session_mode}</span></td>
+                                  <td className="small text-muted">{fmtDate(s.login_at)}</td>
+                                  <td className="small">{fmtElapsed(s.duration_seconds)}</td>
+                                  <td className="small">{s.activity_count || 0}</td>
+                                  <td className="small">{s.touch_count || 0}</td>
+                                  <td>
+                                    <span className={`badge ${s.status === "live" ? "bg-danger" : "bg-success"}`}>
+                                      {s.status === "live" ? "LIVE" : "Report"}
+                                    </span>
+                                  </td>
+                                  <td className="text-end"><span className="text-primary small">Open →</span></td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
                         </div>
                       )}
                     </div>

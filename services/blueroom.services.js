@@ -23,6 +23,9 @@ export const getSessionDetailService = (sessionId, centerID) =>
 export const getPatientSessionsService = (patientId, centerID) =>
   Axios.get(`/api/v1/blueroom/patients/${patientId}/sessions${base(centerID)}`);
 
+export const getRecentSessionsService = (params) =>
+  Axios.get(`/api/v1/blueroom/sessions`, { params });
+
 export const getActivityService = (params) =>
   Axios.get(`/api/v1/blueroom/activity`, { params });
 
