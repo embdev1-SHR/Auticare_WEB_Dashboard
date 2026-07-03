@@ -69,16 +69,22 @@ function BlueroomPage() {
 
   async function loadClasses() {
     setClassLoading(true);
+    // Load classes and credentials independently — a failure in one
+    // must not blank out the other (they hit different databases).
     try {
-      const [cr, ccr] = await Promise.all([
-        getClassesService(cParam()),
-        getDepartmentCredentialsService(cParam()),
-      ]);
+      const cr = await getClassesService(cParam());
       setClasses(cr.data?.results?.data || []);
+    } catch (_) {
+      setClasses([]);
+    }
+    try {
+      const ccr = await getDepartmentCredentialsService(cParam());
       const creds = {};
       (ccr.data?.results?.data || []).forEach((c) => { creds[c.department_id] = c.username; });
       setCredentials(creds);
-    } catch (_) {}
+    } catch (_) {
+      setCredentials({});
+    }
     setClassLoading(false);
   }
 
