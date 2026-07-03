@@ -6,11 +6,10 @@ import withAuth from "../../util/helpers/withAuth";
 import { selectRole } from "../../store/slice/auth.slice";
 import {
   getClassesService, getDepartmentCredentialsService, setDepartmentAuthService,
-  getClassStudentsService, addStudentService, removeStudentService,
+  getClassStudentsService,
   getActivityService, getHeatmapService, getTimeSeriesService,
 } from "../../services/blueroom.services";
 import { fetchAllCentersService } from "../../services/center.services";
-import Axios from "../../util/api.util";
 
 const ApexChart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
@@ -39,9 +38,7 @@ function BlueroomPage() {
 
   const [activeClass, setActiveClass] = useState(null);
   const [students, setStudents] = useState([]);
-  const [allPatients, setAllPatients] = useState([]);
-  const [addPatientId, setAddPatientId] = useState("");
-  const [addPatientName, setAddPatientName] = useState("");
+  const [studentsLoading, setStudentsLoading] = useState(false);
 
   const [filters, setFilters] = useState({ from: weekAgo, to: today, classId: "" });
   const [activity, setActivity] = useState([]);
@@ -111,31 +108,12 @@ function BlueroomPage() {
   }
 
   async function openStudents(cls) {
-    setActiveClass(cls); setStudents([]); setAllPatients([]);
+    setActiveClass(cls); setStudents([]); setStudentsLoading(true);
     try {
-      const [sr, pr] = await Promise.all([
-        getClassStudentsService(cls.ClassID, cParam()),
-        Axios.get("/api/v1/patients"),
-      ]);
-      const pts = pr?.data?.results?.data || [];
+      const sr = await getClassStudentsService(cls.ClassID, cParam());
       setStudents(sr?.data?.results?.data || []);
-      setAllPatients(pts);
-      if (pts.length) { setAddPatientId(String(pts[0].PatientID)); setAddPatientName(pts[0].PatientName); }
     } catch (_) {}
-  }
-
-  async function handleAddStudent() {
-    if (!addPatientId) return;
-    try {
-      const body = { PatientID: addPatientId, PatientName: addPatientName };
-      if (isAdmin && selectedCenter) body.centerID = selectedCenter;
-      await addStudentService(activeClass.ClassID, body);
-      openStudents(activeClass);
-    } catch (_) {}
-  }
-
-  async function handleRemoveStudent(pid) {
-    try { await removeStudentService(activeClass.ClassID, pid, cParam()); openStudents(activeClass); } catch (_) {}
+    setStudentsLoading(false);
   }
 
   async function loadAnalytics() {
@@ -319,59 +297,37 @@ function BlueroomPage() {
                 </div>
               </div>
 
-              {/* ── Students panel ──────────────────────────────────────── */}
+              {/* ── Students panel (read-only — patients in this department) ── */}
               {activeClass && (
                 <div className="row mb-4">
                   <div className="col-12">
                     <div className="card">
                       <div className="card-body">
-                        <div className="d-flex justify-content-between align-items-center mb-3">
+                        <div className="d-flex justify-content-between align-items-center mb-2">
                           <h5 className="mb-0">Students — <span className="text-primary">{activeClass.ClassName}</span></h5>
                           <button className="btn btn-sm btn-outline-secondary" onClick={() => setActiveClass(null)}>Close</button>
                         </div>
-                        <div className="row">
-                          <div className="col-md-7">
-                            {students.length === 0 ? (
-                              <p className="text-muted small">No students in this class yet.</p>
-                            ) : (
-                              <table className="table table-sm mb-0">
-                                <thead><tr><th>Student Name</th><th>Added</th>{canManage && <th></th>}</tr></thead>
-                                <tbody>
-                                  {students.map((s) => (
-                                    <tr key={s.StudentID}>
-                                      <td>{s.StudentName}</td>
-                                      <td className="text-muted small">{isoDate(s.added_at)}</td>
-                                      {canManage && (
-                                        <td>
-                                          <button className="btn btn-sm btn-outline-danger"
-                                            onClick={() => handleRemoveStudent(s.StudentID)}>Remove</button>
-                                        </td>
-                                      )}
-                                    </tr>
-                                  ))}
-                                </tbody>
-                              </table>
-                            )}
-                          </div>
-                          {canManage && (
-                            <div className="col-md-5 border-start">
-                              <p className="small fw-bold mb-2">Add a patient to this class</p>
-                              <select className="form-select form-select-sm mb-2" value={addPatientId}
-                                onChange={(e) => {
-                                  const p = allPatients.find((x) => String(x.PatientID) === e.target.value);
-                                  setAddPatientId(e.target.value);
-                                  setAddPatientName(p?.PatientName || "");
-                                }}>
-                                <option value="">— Select patient —</option>
-                                {allPatients.map((p) => (
-                                  <option key={p.PatientID} value={p.PatientID}>{p.PatientName}</option>
-                                ))}
-                              </select>
-                              <button className="btn btn-primary btn-sm" onClick={handleAddStudent}
-                                disabled={!addPatientId}>Add to Class</button>
-                            </div>
-                          )}
-                        </div>
+                        <p className="text-muted small mb-3">
+                          Students are the patients assigned to this department. To add or move a student,
+                          set their department on the <strong>Patients</strong> page.
+                        </p>
+                        {studentsLoading ? (
+                          <p className="text-muted small">Loading…</p>
+                        ) : students.length === 0 ? (
+                          <p className="text-muted small">No patients assigned to this department yet.</p>
+                        ) : (
+                          <table className="table table-sm mb-0" style={{ maxWidth: 480 }}>
+                            <thead><tr><th style={{ width: 60 }}>#</th><th>Student Name</th></tr></thead>
+                            <tbody>
+                              {students.map((s, i) => (
+                                <tr key={s.StudentID}>
+                                  <td className="text-muted">{i + 1}</td>
+                                  <td>{s.StudentName}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        )}
                       </div>
                     </div>
                   </div>
