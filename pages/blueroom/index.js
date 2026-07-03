@@ -5,7 +5,7 @@ import Layout from "../../components/shared/layout";
 import withAuth from "../../util/helpers/withAuth";
 import { selectRole } from "../../store/slice/auth.slice";
 import {
-  getClassesService, createClassService, deleteClassService,
+  getClassesService, setDepartmentPasswordService,
   getClassStudentsService, addStudentService, removeStudentService,
   getActivityService, getHeatmapService, getTimeSeriesService,
 } from "../../services/blueroom.services";
@@ -22,15 +22,18 @@ const weekAgo = isoDate(new Date(Date.now() - 7 * 86400000));
 function BlueroomPage() {
   const role = useSelector(selectRole);
   const isAdmin = role === "SuperAdmin" || role === "ClientAdmin";
+  const canManage = role === "SuperAdmin" || role === "ClientAdmin" || role === "Center";
 
   const [centers, setCenters] = useState([]);
   const [selectedCenter, setSelectedCenter] = useState("");
 
   const [classes, setClasses] = useState([]);
   const [classLoading, setClassLoading] = useState(false);
-  const [newClassName, setNewClassName] = useState("");
-  const [newClassPass, setNewClassPass] = useState("");
-  const [classMsg, setClassMsg] = useState({ text: "", ok: true });
+
+  // Set-password inline state
+  const [passClassId, setPassClassId] = useState(null);
+  const [passValue, setPassValue] = useState("");
+  const [passMsg, setPassMsg] = useState({ text: "", ok: true });
 
   const [activeClass, setActiveClass] = useState(null);
   const [students, setStudents] = useState([]);
@@ -45,7 +48,6 @@ function BlueroomPage() {
   const [analyticsLoading, setAnalyticsLoading] = useState(false);
 
   const canvasRef = useRef(null);
-  const canManage = role === "SuperAdmin" || role === "ClientAdmin" || role === "Center";
 
   useEffect(() => {
     if (isAdmin) {
@@ -72,24 +74,24 @@ function BlueroomPage() {
     setClassLoading(false);
   }
 
-  async function handleCreateClass(e) {
-    e.preventDefault();
-    try {
-      const body = { ClassName: newClassName, password: newClassPass };
-      if (isAdmin && selectedCenter) body.centerID = selectedCenter;
-      await createClassService(body);
-      setNewClassName(""); setNewClassPass("");
-      setClassMsg({ text: "Class created successfully.", ok: true });
-      loadClasses();
-    } catch (err) {
-      setClassMsg({ text: err?.response?.data?.errors?.message || "Failed.", ok: false });
-    }
-    setTimeout(() => setClassMsg({ text: "", ok: true }), 3000);
+  function openSetPassword(classId) {
+    setPassClassId(classId);
+    setPassValue("");
+    setPassMsg({ text: "", ok: true });
   }
 
-  async function handleDeleteClass(classId) {
-    if (!window.confirm("Delete this class and all its student mappings?")) return;
-    try { await deleteClassService(classId, cParam()); loadClasses(); } catch (_) {}
+  async function handleSetPassword(e, classId) {
+    e.preventDefault();
+    if (!passValue) return;
+    try {
+      const centerID = isAdmin ? selectedCenter : undefined;
+      await setDepartmentPasswordService(classId, { password: passValue }, centerID);
+      setPassMsg({ text: "Password saved.", ok: true });
+      setPassValue("");
+      setTimeout(() => { setPassClassId(null); setPassMsg({ text: "", ok: true }); }, 1500);
+    } catch (err) {
+      setPassMsg({ text: err?.response?.data?.errors?.message || "Failed.", ok: false });
+    }
   }
 
   async function openStudents(cls) {
@@ -191,7 +193,9 @@ function BlueroomPage() {
           <div className="row mb-3 align-items-center">
             <div className="col">
               <h4 className="mb-0">Blueroom</h4>
-              <p className="text-muted small mb-0">Manage classes, students and view session analytics</p>
+              <p className="text-muted small mb-0">
+                Departments are used as classes. Manage students and view session analytics.
+              </p>
             </div>
             {isAdmin && (
               <div className="col-auto">
@@ -212,31 +216,69 @@ function BlueroomPage() {
             </div></div>
           ) : (
             <>
-              {/* ── Classes section ──────────────────────────────────────── */}
+              {/* ── Classes (Departments) ─────────────────────────────────── */}
               <div className="row mb-4">
-                <div className={canManage ? "col-lg-8" : "col-12"}>
+                <div className="col-12">
                   <div className="card">
                     <div className="card-body">
-                      <h5 className="card-title">Classes</h5>
+                      <h5 className="card-title">Departments / Classes</h5>
+                      <p className="text-muted small mb-3">
+                        These are the departments created for this center. Set a password on each one to enable
+                        class login on the Blueroom device.
+                      </p>
                       {classLoading ? <p className="text-muted">Loading…</p> : classes.length === 0 ? (
-                        <p className="text-muted small">No classes yet.</p>
+                        <p className="text-muted small">No departments found for this center.</p>
                       ) : (
                         <table className="table table-sm table-hover mb-0">
-                          <thead><tr><th>Class Name</th><th>Created</th><th className="text-end">Actions</th></tr></thead>
+                          <thead>
+                            <tr>
+                              <th>Department / Class Name</th>
+                              <th className="text-end">Actions</th>
+                            </tr>
+                          </thead>
                           <tbody>
                             {classes.map((c) => (
-                              <tr key={c.ClassID}>
-                                <td><strong>{c.ClassName}</strong></td>
-                                <td className="text-muted small">{isoDate(c.created_at)}</td>
-                                <td className="text-end">
-                                  <button className="btn btn-sm btn-outline-primary me-1"
-                                    onClick={() => openStudents(c)}>Students</button>
-                                  {canManage && (
-                                    <button className="btn btn-sm btn-outline-danger"
-                                      onClick={() => handleDeleteClass(c.ClassID)}>Delete</button>
-                                  )}
-                                </td>
-                              </tr>
+                              <>
+                                <tr key={c.ClassID}>
+                                  <td><strong>{c.ClassName}</strong></td>
+                                  <td className="text-end">
+                                    <button className="btn btn-sm btn-outline-primary me-1"
+                                      onClick={() => openStudents(c)}>Students</button>
+                                    {canManage && (
+                                      <button
+                                        className={`btn btn-sm ${passClassId === c.ClassID ? "btn-secondary" : "btn-outline-secondary"}`}
+                                        onClick={() => passClassId === c.ClassID ? setPassClassId(null) : openSetPassword(c.ClassID)}>
+                                        {passClassId === c.ClassID ? "Cancel" : "Set Password"}
+                                      </button>
+                                    )}
+                                  </td>
+                                </tr>
+                                {passClassId === c.ClassID && (
+                                  <tr key={`pass-${c.ClassID}`}>
+                                    <td colSpan={2} className="bg-light">
+                                      <form className="d-flex gap-2 align-items-center py-1"
+                                        onSubmit={(e) => handleSetPassword(e, c.ClassID)}>
+                                        <input
+                                          type="password"
+                                          className="form-control form-control-sm"
+                                          style={{ maxWidth: 240 }}
+                                          placeholder="New class password"
+                                          value={passValue}
+                                          onChange={(e) => setPassValue(e.target.value)}
+                                          required
+                                          autoFocus
+                                        />
+                                        <button className="btn btn-sm btn-success" type="submit">Save</button>
+                                        {passMsg.text && (
+                                          <span className={`small ${passMsg.ok ? "text-success" : "text-danger"}`}>
+                                            {passMsg.text}
+                                          </span>
+                                        )}
+                                      </form>
+                                    </td>
+                                  </tr>
+                                )}
+                              </>
                             ))}
                           </tbody>
                         </table>
@@ -244,35 +286,6 @@ function BlueroomPage() {
                     </div>
                   </div>
                 </div>
-
-                {canManage && (
-                  <div className="col-lg-4">
-                    <div className="card">
-                      <div className="card-body">
-                        <h5 className="card-title">New Class</h5>
-                        <form onSubmit={handleCreateClass}>
-                          <div className="mb-2">
-                            <label className="form-label small fw-bold">Class Name</label>
-                            <input className="form-control form-control-sm" placeholder="e.g. Morning Batch A"
-                              value={newClassName} onChange={(e) => setNewClassName(e.target.value)} required />
-                          </div>
-                          <div className="mb-3">
-                            <label className="form-label small fw-bold">Entry Password</label>
-                            <input className="form-control form-control-sm" type="password"
-                              placeholder="Operators enter this on the device"
-                              value={newClassPass} onChange={(e) => setNewClassPass(e.target.value)} required />
-                          </div>
-                          {classMsg.text && (
-                            <p className={`small mb-2 ${classMsg.ok ? "text-success" : "text-danger"}`}>
-                              {classMsg.text}
-                            </p>
-                          )}
-                          <button className="btn btn-primary btn-sm w-100" type="submit">Create Class</button>
-                        </form>
-                      </div>
-                    </div>
-                  </div>
-                )}
               </div>
 
               {/* ── Students panel ──────────────────────────────────────── */}
