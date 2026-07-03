@@ -8,8 +8,10 @@ import {
   getClassesService, getDepartmentCredentialsService, setDepartmentAuthService,
   getClassStudentsService,
   getActivityService, getHeatmapService, getTimeSeriesService,
+  getLiveSessionsService, getSessionDetailService,
 } from "../../services/blueroom.services";
 import { fetchAllCentersService } from "../../services/center.services";
+import SessionDetailModal from "../../components/blueroom/session-detail-modal";
 
 const ApexChart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
@@ -46,6 +48,10 @@ function BlueroomPage() {
   const [timeSeries, setTimeSeries] = useState([]);
   const [analyticsLoading, setAnalyticsLoading] = useState(false);
 
+  // Live monitoring
+  const [liveSessions, setLiveSessions] = useState([]);
+  const [openSessionId, setOpenSessionId] = useState(null);
+
   const canvasRef = useRef(null);
 
   useEffect(() => {
@@ -63,6 +69,27 @@ function BlueroomPage() {
   }, [selectedCenter]);
 
   const cParam = () => (isAdmin ? selectedCenter : undefined);
+
+  // Poll live sessions every 5s (only once a center context is ready).
+  useEffect(() => {
+    if (isAdmin && !selectedCenter) { setLiveSessions([]); return; }
+    let alive = true;
+    const load = async () => {
+      try {
+        const r = await getLiveSessionsService(cParam());
+        if (alive) setLiveSessions(r.data?.results?.data || []);
+      } catch (_) {}
+    };
+    load();
+    const id = setInterval(load, 5000);
+    return () => { alive = false; clearInterval(id); };
+  }, [selectedCenter, isAdmin]);
+
+  const fmtElapsed = (secs) => {
+    const s = Math.max(0, parseInt(secs || 0, 10));
+    const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+    return (h ? `${h}h ` : "") + (m ? `${m}m ` : "") + `${sec}s`;
+  };
 
   async function loadClasses() {
     setClassLoading(true);
@@ -210,6 +237,58 @@ function BlueroomPage() {
             </div></div>
           ) : (
             <>
+              {/* ── Live Now ──────────────────────────────────────────────── */}
+              <div className="row mb-4">
+                <div className="col-12">
+                  <div className="card">
+                    <div className="card-body">
+                      <div className="d-flex align-items-center mb-3">
+                        <span className="live-dot" />
+                        <h5 className="card-title mb-0 ms-2">Live Now</h5>
+                        <span className="badge bg-danger ms-2">{liveSessions.length}</span>
+                        <span className="text-muted small ms-auto">Auto-refreshing every 5s</span>
+                      </div>
+                      {liveSessions.length === 0 ? (
+                        <p className="text-muted small mb-0">No active sessions right now. Cards appear here when a device is playing online.</p>
+                      ) : (
+                        <div className="row g-3">
+                          {liveSessions.map((s) => (
+                            <div className="col-md-6 col-xl-4" key={s.session_id}>
+                              <div className="live-card" onClick={() => setOpenSessionId(s.session_id)}>
+                                <div className="d-flex justify-content-between align-items-start mb-2">
+                                  <div>
+                                    <div className="fw-bold">
+                                      {s.session_mode === "individual"
+                                        ? (s.patient_name || `Patient #${s.patient_id}`)
+                                        : (s.class_name || "Class session")}
+                                    </div>
+                                    <div className="text-muted small">{s.class_name || "—"}</div>
+                                  </div>
+                                  <span className={`badge ${s.session_mode === "individual" ? "bg-info" : "bg-warning text-dark"}`}>
+                                    {s.session_mode}
+                                  </span>
+                                </div>
+                                <div className="small mb-1">
+                                  <span className="text-muted">Activity: </span>
+                                  <strong>{s.current_activity || "menu"}</strong>
+                                </div>
+                                <div className="d-flex justify-content-between small text-muted">
+                                  <span>⏱ {fmtElapsed(s.elapsed_seconds)}</span>
+                                  <span>👆 {s.touch_count || 0} touches</span>
+                                </div>
+                                <div className="live-card-foot">
+                                  <span className="live-dot sm" /> LIVE · click for details
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               {/* ── Classes (Departments) ─────────────────────────────────── */}
               <div className="row mb-4">
                 <div className="col-12">
@@ -456,6 +535,42 @@ function BlueroomPage() {
           )}
         </div>
       </div>
+
+      {openSessionId && (
+        <SessionDetailModal
+          sessionId={openSessionId}
+          centerID={cParam()}
+          fetchDetail={getSessionDetailService}
+          fmtElapsed={fmtElapsed}
+          onClose={() => setOpenSessionId(null)}
+        />
+      )}
+
+      <style jsx>{`
+        .live-dot {
+          display: inline-block; width: 12px; height: 12px; border-radius: 50%;
+          background: #f46a6a; box-shadow: 0 0 0 rgba(244,106,106,0.6);
+          animation: pulse 1.6s infinite;
+        }
+        .live-dot.sm { width: 8px; height: 8px; }
+        @keyframes pulse {
+          0% { box-shadow: 0 0 0 0 rgba(244,106,106,0.6); }
+          70% { box-shadow: 0 0 0 8px rgba(244,106,106,0); }
+          100% { box-shadow: 0 0 0 0 rgba(244,106,106,0); }
+        }
+        .live-card {
+          border: 1px solid #e2e8f0; border-left: 4px solid #f46a6a;
+          border-radius: 12px; padding: 14px; cursor: pointer;
+          background: #fff; transition: box-shadow .15s, transform .12s;
+          height: 100%;
+        }
+        .live-card:hover { box-shadow: 0 6px 18px rgba(0,0,0,0.1); transform: translateY(-2px); }
+        .live-card-foot {
+          margin-top: 10px; padding-top: 8px; border-top: 1px dashed #e2e8f0;
+          font-size: 11px; font-weight: 700; color: #f46a6a;
+          text-transform: uppercase; letter-spacing: .5px;
+        }
+      `}</style>
     </Layout>
   );
 }

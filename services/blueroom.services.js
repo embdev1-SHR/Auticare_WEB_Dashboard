@@ -14,6 +14,12 @@ export const setDepartmentAuthService = (classId, data, centerID) =>
 export const getClassStudentsService = (classId, centerID) =>
   Axios.get(`/api/v1/blueroom/classes/${classId}/students${base(centerID)}`);
 
+export const getLiveSessionsService = (centerID) =>
+  Axios.get(`/api/v1/blueroom/live${base(centerID)}`);
+
+export const getSessionDetailService = (sessionId, centerID) =>
+  Axios.get(`/api/v1/blueroom/sessions/${sessionId}${base(centerID)}`);
+
 export const getActivityService = (params) =>
   Axios.get(`/api/v1/blueroom/activity`, { params });
 
