@@ -8,7 +8,7 @@ import {
   getClassesService, getDepartmentCredentialsService, setDepartmentAuthService,
   getClassStudentsService,
   getActivityService, getHeatmapService, getTimeSeriesService,
-  getLiveSessionsService, getSessionDetailService,
+  getLiveSessionsService, getSessionDetailService, getPatientSessionsService,
 } from "../../services/blueroom.services";
 import { fetchAllCentersService } from "../../services/center.services";
 import SessionDetailModal from "../../components/blueroom/session-detail-modal";
@@ -541,6 +541,7 @@ function BlueroomPage() {
           sessionId={openSessionId}
           centerID={cParam()}
           fetchDetail={getSessionDetailService}
+          fetchPatientSessions={getPatientSessionsService}
           fmtElapsed={fmtElapsed}
           onClose={() => setOpenSessionId(null)}
         />

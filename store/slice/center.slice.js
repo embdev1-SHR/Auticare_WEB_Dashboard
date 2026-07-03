@@ -10,6 +10,7 @@ import {
   approveCenterService,
   rejectCenterService,
   regenerateCenterApiKeyService,
+  setCenterDeviceLimitService,
 } from "../../services/center.services";
 
 import { setModalOpen } from "./layout.slice";
@@ -151,6 +152,21 @@ export const regenerateCenterApiKey = createAsyncThunk(
       return newKey;
     } catch (error) {
       ToastNotification("error", "Failed to regenerate API key");
+      return thunkApi.rejectWithValue(error.message);
+    }
+  }
+);
+
+export const setCenterDeviceLimit = createAsyncThunk(
+  "center/setCenterDeviceLimit",
+  async ({ CenterID, MaxDevices }, thunkApi) => {
+    try {
+      await setCenterDeviceLimitService(CenterID, MaxDevices);
+      ToastNotification("success", "Device limit updated");
+      thunkApi.dispatch(SelectCenter(CenterID));
+      return MaxDevices;
+    } catch (error) {
+      ToastNotification("error", "Failed to update device limit");
       return thunkApi.rejectWithValue(error.message);
     }
   }

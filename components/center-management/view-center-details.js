@@ -15,6 +15,7 @@ import {
   setCenterEdit,
   updateCenter,
   regenerateCenterApiKey,
+  setCenterDeviceLimit,
 } from "../../store/slice/center.slice";
 import {
   getAllStates,
@@ -66,6 +67,15 @@ function ViewCenterDetails() {
     if (window.confirm("Regenerate this center's API key? The old key will stop working immediately.")) {
       await dispatch(regenerateCenterApiKey(center.CenterID));
     }
+  };
+
+  const [deviceLimit, setDeviceLimit] = useState("");
+  useEffect(() => {
+    setDeviceLimit(center?.MaxDevices != null ? String(center.MaxDevices) : "1");
+  }, [center?.MaxDevices]);
+
+  const handleSaveDeviceLimit = async () => {
+    await dispatch(setCenterDeviceLimit({ CenterID: center.CenterID, MaxDevices: parseInt(deviceLimit, 10) || 1 }));
   };
   const [initialValueSet, setInitialValueSet] = useState({ value: center?.ClientID, label: center?.ClientName });
 
@@ -270,6 +280,31 @@ function ViewCenterDetails() {
                       </Col>
                     </Row>
                   )}
+                  <Row>
+                    <Col lg="6">
+                      <div className="mb-4">
+                        <Label className="form-label">Device Limit (max activations)</Label>
+                        {UserData?.RoleName === "SuperAdmin" ? (
+                          <div className="d-flex align-items-center gap-2">
+                            <input
+                              type="number"
+                              min="1"
+                              value={deviceLimit}
+                              onChange={(e) => setDeviceLimit(e.target.value)}
+                              className="form-control"
+                              style={{ maxWidth: 120 }}
+                            />
+                            <Button color="primary" size="sm" onClick={handleSaveDeviceLimit} style={{ whiteSpace: "nowrap" }}>
+                              Save
+                            </Button>
+                            <span className="text-muted small">How many devices this center may activate.</span>
+                          </div>
+                        ) : (
+                          <input type="text" readOnly value={center?.MaxDevices ?? 1} className="form-control" style={{ maxWidth: 120 }} />
+                        )}
+                      </div>
+                    </Col>
+                  </Row>
                 </>
               ) : UserData.RoleName === "SuperAdmin" ?
                   // <div className="mb-4">

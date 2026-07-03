@@ -45,3 +45,8 @@ export const regenerateCenterApiKeyService = async (CenterID) => {
   const result = await Axios.post(`/api/v1/centers/${CenterID}/regenerate-api-key`);
   return result;
 };
+
+export const setCenterDeviceLimitService = async (CenterID, MaxDevices) => {
+  const result = await Axios.put(`/api/v1/centers/${CenterID}/device-limit`, { MaxDevices });
+  return result;
+};

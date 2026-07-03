@@ -69,7 +69,7 @@ function SidebarContent(props) {
                 return <SidebarListitem key={key} title={menu.title} location={menu.location} iconClass={menu.icon} />;
               }
             })}
-            {(role === "ClientAdmin" || role === "Center") && (
+            {(role === "ClientAdmin" || role === "Center" || role === "Therapist") && (
               <SidebarListitem title="Blueroom" location="blueroom" iconClass="ri-tv-line" />
             )}
           </>
