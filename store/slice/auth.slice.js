@@ -124,19 +124,11 @@ export const getUserData = createAsyncThunk("auth/getUserData", async (args, thu
     const RefreshTokenValue = await getRefreshToken();
     if (RefreshTokenValue) {
       const { data } = await Axios.get(`/api/v1/users/details`);
-<<<<<<< Updated upstream
-      const SubscriptionPlan = data.results.data.SubscriptionPlan
-      if (SubscriptionPlan && SubscriptionPlan.length > 0) {
-        const endDate = SubscriptionPlan[SubscriptionPlan.length - 1].SubcriptionPlanEndDate
-        const SubscriptionPlanEndDate = Date.parse(endDate)
-        const currentDate = Date.parse(new Date())
-=======
       const SubscriptionPlan = data.results.data.SubscriptionPlan;
       if (SubscriptionPlan && SubscriptionPlan.length > 0) {
         const endDate = SubscriptionPlan[SubscriptionPlan.length - 1].SubcriptionPlanEndDate;
         const SubscriptionPlanEndDate = Date.parse(endDate);
         const currentDate = Date.parse(new Date());
->>>>>>> Stashed changes
         if (currentDate > SubscriptionPlanEndDate) {
           return Router.push("subscription-expired");
         } else {
