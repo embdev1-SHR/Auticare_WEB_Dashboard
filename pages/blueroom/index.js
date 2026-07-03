@@ -5,7 +5,7 @@ import Layout from "../../components/shared/layout";
 import withAuth from "../../util/helpers/withAuth";
 import { selectRole } from "../../store/slice/auth.slice";
 import {
-  getClassesService, setDepartmentPasswordService,
+  getClassesService, getDepartmentCredentialsService, setDepartmentAuthService,
   getClassStudentsService, addStudentService, removeStudentService,
   getActivityService, getHeatmapService, getTimeSeriesService,
 } from "../../services/blueroom.services";
@@ -29,11 +29,13 @@ function BlueroomPage() {
 
   const [classes, setClasses] = useState([]);
   const [classLoading, setClassLoading] = useState(false);
+  const [credentials, setCredentials] = useState({}); // { [department_id]: username }
 
-  // Set-password inline state
-  const [passClassId, setPassClassId] = useState(null);
-  const [passValue, setPassValue] = useState("");
-  const [passMsg, setPassMsg] = useState({ text: "", ok: true });
+  // Set-credentials inline state
+  const [credClassId, setCredClassId] = useState(null);
+  const [credUsername, setCredUsername] = useState("");
+  const [credPassword, setCredPassword] = useState("");
+  const [credMsg, setCredMsg] = useState({ text: "", ok: true });
 
   const [activeClass, setActiveClass] = useState(null);
   const [students, setStudents] = useState([]);
@@ -68,29 +70,37 @@ function BlueroomPage() {
   async function loadClasses() {
     setClassLoading(true);
     try {
-      const r = await getClassesService(cParam());
-      setClasses(r.data?.results?.data || []);
+      const [cr, ccr] = await Promise.all([
+        getClassesService(cParam()),
+        getDepartmentCredentialsService(cParam()),
+      ]);
+      setClasses(cr.data?.results?.data || []);
+      const creds = {};
+      (ccr.data?.results?.data || []).forEach((c) => { creds[c.department_id] = c.username; });
+      setCredentials(creds);
     } catch (_) {}
     setClassLoading(false);
   }
 
-  function openSetPassword(classId) {
-    setPassClassId(classId);
-    setPassValue("");
-    setPassMsg({ text: "", ok: true });
+  function openSetCredentials(classId) {
+    setCredClassId(classId);
+    setCredUsername(credentials[classId] || "");
+    setCredPassword("");
+    setCredMsg({ text: "", ok: true });
   }
 
-  async function handleSetPassword(e, classId) {
+  async function handleSetCredentials(e, classId) {
     e.preventDefault();
-    if (!passValue) return;
+    if (!credUsername || !credPassword) return;
     try {
       const centerID = isAdmin ? selectedCenter : undefined;
-      await setDepartmentPasswordService(classId, { password: passValue }, centerID);
-      setPassMsg({ text: "Password saved.", ok: true });
-      setPassValue("");
-      setTimeout(() => { setPassClassId(null); setPassMsg({ text: "", ok: true }); }, 1500);
+      await setDepartmentAuthService(classId, { username: credUsername, password: credPassword }, centerID);
+      setCredMsg({ text: "Credentials saved.", ok: true });
+      setCredentials((prev) => ({ ...prev, [classId]: credUsername }));
+      setCredPassword("");
+      setTimeout(() => { setCredClassId(null); setCredMsg({ text: "", ok: true }); }, 1500);
     } catch (err) {
-      setPassMsg({ text: err?.response?.data?.errors?.message || "Failed.", ok: false });
+      setCredMsg({ text: err?.response?.data?.errors?.message || "Failed.", ok: false });
     }
   }
 
@@ -233,6 +243,7 @@ function BlueroomPage() {
                           <thead>
                             <tr>
                               <th>Department / Class Name</th>
+                              <th>Login Username</th>
                               <th className="text-end">Actions</th>
                             </tr>
                           </thead>
@@ -241,37 +252,51 @@ function BlueroomPage() {
                               <>
                                 <tr key={c.ClassID}>
                                   <td><strong>{c.ClassName}</strong></td>
+                                  <td>
+                                    {credentials[c.ClassID]
+                                      ? <code className="text-success">{credentials[c.ClassID]}</code>
+                                      : <span className="text-muted small">Not set</span>}
+                                  </td>
                                   <td className="text-end">
                                     <button className="btn btn-sm btn-outline-primary me-1"
                                       onClick={() => openStudents(c)}>Students</button>
                                     {canManage && (
                                       <button
-                                        className={`btn btn-sm ${passClassId === c.ClassID ? "btn-secondary" : "btn-outline-secondary"}`}
-                                        onClick={() => passClassId === c.ClassID ? setPassClassId(null) : openSetPassword(c.ClassID)}>
-                                        {passClassId === c.ClassID ? "Cancel" : "Set Password"}
+                                        className={`btn btn-sm ${credClassId === c.ClassID ? "btn-secondary" : "btn-outline-secondary"}`}
+                                        onClick={() => credClassId === c.ClassID ? setCredClassId(null) : openSetCredentials(c.ClassID)}>
+                                        {credClassId === c.ClassID ? "Cancel" : "Set Credentials"}
                                       </button>
                                     )}
                                   </td>
                                 </tr>
-                                {passClassId === c.ClassID && (
-                                  <tr key={`pass-${c.ClassID}`}>
-                                    <td colSpan={2} className="bg-light">
-                                      <form className="d-flex gap-2 align-items-center py-1"
-                                        onSubmit={(e) => handleSetPassword(e, c.ClassID)}>
+                                {credClassId === c.ClassID && (
+                                  <tr key={`cred-${c.ClassID}`}>
+                                    <td colSpan={3} className="bg-light">
+                                      <form className="d-flex gap-2 align-items-center py-1 flex-wrap"
+                                        onSubmit={(e) => handleSetCredentials(e, c.ClassID)}>
                                         <input
-                                          type="password"
+                                          type="text"
                                           className="form-control form-control-sm"
-                                          style={{ maxWidth: 240 }}
-                                          placeholder="New class password"
-                                          value={passValue}
-                                          onChange={(e) => setPassValue(e.target.value)}
+                                          style={{ maxWidth: 180 }}
+                                          placeholder="Username"
+                                          value={credUsername}
+                                          onChange={(e) => setCredUsername(e.target.value)}
                                           required
                                           autoFocus
                                         />
+                                        <input
+                                          type="password"
+                                          className="form-control form-control-sm"
+                                          style={{ maxWidth: 180 }}
+                                          placeholder="Password"
+                                          value={credPassword}
+                                          onChange={(e) => setCredPassword(e.target.value)}
+                                          required
+                                        />
                                         <button className="btn btn-sm btn-success" type="submit">Save</button>
-                                        {passMsg.text && (
-                                          <span className={`small ${passMsg.ok ? "text-success" : "text-danger"}`}>
-                                            {passMsg.text}
+                                        {credMsg.text && (
+                                          <span className={`small ${credMsg.ok ? "text-success" : "text-danger"}`}>
+                                            {credMsg.text}
                                           </span>
                                         )}
                                       </form>

@@ -5,8 +5,11 @@ const base = (centerID) => (centerID ? `?centerID=${centerID}` : "");
 export const getClassesService = (centerID) =>
   Axios.get(`/api/v1/blueroom/classes${base(centerID)}`);
 
-export const setDepartmentPasswordService = (classId, data, centerID) =>
-  Axios.post(`/api/v1/blueroom/classes/${classId}/password${base(centerID)}`, data);
+export const getDepartmentCredentialsService = (centerID) =>
+  Axios.get(`/api/v1/blueroom/classes/credentials${base(centerID)}`);
+
+export const setDepartmentAuthService = (classId, data, centerID) =>
+  Axios.post(`/api/v1/blueroom/classes/${classId}/auth${base(centerID)}`, data);
 
 export const getClassStudentsService = (classId, centerID) =>
   Axios.get(`/api/v1/blueroom/classes/${classId}/students${base(centerID)}`);
