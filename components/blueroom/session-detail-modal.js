@@ -3,17 +3,39 @@ import dynamic from "next/dynamic";
 
 const ApexChart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
-// One small heatmap canvas for a single scenario's touches.
-function ScenarioHeatmap({ touches }) {
+// One small heatmap canvas for a single scenario's touches, drawn over the
+// captured scenario screen (bgUrl) when available, else a dark canvas.
+function ScenarioHeatmap({ touches, bgUrl }) {
   const ref = useRef(null);
+  const [bg, setBg] = useState(null);
+
+  useEffect(() => {
+    if (!bgUrl) { setBg(null); return; }
+    const img = new Image();
+    img.onload = () => setBg(img);
+    img.onerror = () => setBg(null);
+    img.src = bgUrl; // no crossOrigin: we only draw it, never read pixels back
+  }, [bgUrl]);
+
   useEffect(() => {
     const canvas = ref.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     const W = canvas.width, H = canvas.height;
     ctx.clearRect(0, 0, W, H);
-    ctx.fillStyle = "#0f1117";
-    ctx.fillRect(0, 0, W, H);
+    if (bg) {
+      // cover-fit the screenshot
+      const ar = bg.width / bg.height, car = W / H;
+      let dw = W, dh = H, dx = 0, dy = 0;
+      if (ar > car) { dh = H; dw = H * ar; dx = (W - dw) / 2; }
+      else { dw = W; dh = W / ar; dy = (H - dh) / 2; }
+      ctx.drawImage(bg, dx, dy, dw, dh);
+      ctx.fillStyle = "rgba(15,17,23,0.35)"; // dim so touches pop
+      ctx.fillRect(0, 0, W, H);
+    } else {
+      ctx.fillStyle = "#0f1117";
+      ctx.fillRect(0, 0, W, H);
+    }
     touches.forEach(({ x, y, screen_width, screen_height }) => {
       const px = (x / (screen_width || 1920)) * W;
       const py = (y / (screen_height || 1080)) * H;
@@ -39,7 +61,7 @@ function ScenarioHeatmap({ touches }) {
       ctx.textAlign = "center"; ctx.textBaseline = "middle";
       ctx.fillText(String(count), px, py);
     });
-  }, [touches]);
+  }, [touches, bg]);
   return <canvas ref={ref} width={360} height={216} style={{ width: "100%", display: "block", borderRadius: 8 }} />;
 }
 
@@ -65,6 +87,7 @@ export default function SessionDetailModal({ sessionId, centerID, fetchDetail, f
 
   const session = detail?.session;
   const events = detail?.events || [];
+  const shots = detail?.shots || {};
   const isLive = session?.status === "live";
   const patientId = session?.patient_id;
 
@@ -205,7 +228,7 @@ export default function SessionDetailModal({ sessionId, centerID, fetchDetail, f
                             <strong>{sc.name}</strong>
                             <span className="text-muted small">{sc.touches.length} touches</span>
                           </div>
-                          <ScenarioHeatmap touches={sc.touches} />
+                          <ScenarioHeatmap touches={sc.touches} bgUrl={shots[sc.name]} />
                         </div>
                       ))}
                     </div>

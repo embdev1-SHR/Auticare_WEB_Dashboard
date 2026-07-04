@@ -7,6 +7,7 @@ import PageTitle from "../../components/shared/pagetitle";
 import Search from "../../components/shared/search";
 import { AppointmentsList } from "../../components/therapist-component/appointments/appointmentsList.component";
 import AddAppointment from "../../components/therapist-component/appointments/add-appointment.component";
+import ManageSlots from "../../components/therapist-component/appointments/manage-slots.component";
 import { fetchAllAppointments, selectAppointmentsList, selectAppointmentsLoading } from "../../store/slice/appointment.slice";
 import { changeBreadcrumb, changeTitle } from "../../store/slice/layout.slice";
 import withAuth from "../../util/helpers/withAuth";
@@ -65,6 +66,7 @@ const Appointments = () => {
           <div className='main_listing'>
             <div className='tab_data_header'>
               <div className='tab_actions'>
+                {role === "Therapist" && <ManageSlots />}
                 <AddAppointment />
                 {appoinments.length > 0 && (
                   <>

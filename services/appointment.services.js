@@ -16,3 +16,11 @@ export const fetchAppointmentSlotsByTherapistService = async (TherapistID) => {
   const result = await Axios.get(`/api/v1/appointmentSlots/${TherapistID}`);
   return result;
 };
+export const createAppointmentSlotsService = async (data) => {
+  const result = await Axios.post(`/api/v1/appointmentSlots`, data);
+  return result;
+};
+export const updateAppointmentSlotService = async (AppointmentSlotID, data) => {
+  const result = await Axios.put(`/api/v1/appointmentSlots/${AppointmentSlotID}`, data);
+  return result;
+};
