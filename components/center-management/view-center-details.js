@@ -74,8 +74,14 @@ function ViewCenterDetails() {
     setDeviceLimit(center?.MaxDevices != null ? String(center.MaxDevices) : "1");
   }, [center?.MaxDevices]);
 
+  // 0 means a DEVELOPER LICENCE (unlimited devices, and a device already bound
+  // to another centre is re-bound rather than refused). `|| 1` turned that 0
+  // into 1, so a developer licence could never actually be saved from here.
+  const isDevLicence = Number(center?.MaxDevices) === 0;
   const handleSaveDeviceLimit = async () => {
-    await dispatch(setCenterDeviceLimit({ CenterID: center.CenterID, MaxDevices: parseInt(deviceLimit, 10) || 1 }));
+    const parsed = parseInt(deviceLimit, 10);
+    const value = parsed === 0 ? 0 : (Number.isNaN(parsed) ? 1 : Math.max(1, parsed));
+    await dispatch(setCenterDeviceLimit({ CenterID: center.CenterID, MaxDevices: value }));
   };
   const [initialValueSet, setInitialValueSet] = useState({ value: center?.ClientID, label: center?.ClientName });
 
@@ -248,7 +254,17 @@ function ViewCenterDetails() {
                     <Row>
                       <Col>
                         <div className="mb-4">
-                          <Label className="form-label">Center API Key</Label>
+                          <Label className="form-label">
+                            Center API Key
+                            {isDevLicence && (
+                              <span
+                                className="badge bg-warning text-dark ms-2"
+                                title="Unlimited devices. Safe to share with the team for testing; revoke by setting the device limit back to 1."
+                              >
+                                DEVELOPER LICENCE
+                              </span>
+                            )}
+                          </Label>
                           <div className="d-flex align-items-center gap-2">
                             <input
                               type="text"
@@ -288,7 +304,7 @@ function ViewCenterDetails() {
                           <div className="d-flex align-items-center gap-2">
                             <input
                               type="number"
-                              min="1"
+                              min="0"
                               value={deviceLimit}
                               onChange={(e) => setDeviceLimit(e.target.value)}
                               className="form-control"
@@ -297,10 +313,19 @@ function ViewCenterDetails() {
                             <Button color="primary" size="sm" onClick={handleSaveDeviceLimit} style={{ whiteSpace: "nowrap" }}>
                               Save
                             </Button>
-                            <span className="text-muted small">How many devices this center may activate.</span>
+                            <span className="text-muted small">
+                              How many devices this center may activate.{" "}
+                              <strong>0 = developer licence</strong> (unlimited).
+                            </span>
                           </div>
                         ) : (
-                          <input type="text" readOnly value={center?.MaxDevices ?? 1} className="form-control" style={{ maxWidth: 120 }} />
+                          <input
+                            type="text"
+                            readOnly
+                            value={isDevLicence ? "Unlimited (developer licence)" : (center?.MaxDevices ?? 1)}
+                            className="form-control"
+                            style={{ maxWidth: 260 }}
+                          />
                         )}
                       </div>
                     </Col>
