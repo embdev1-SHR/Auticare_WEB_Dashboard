@@ -55,7 +55,19 @@ function DevLicence() {
     Axios.get("/api/v1/centers/dev-licence")
       .then((r) => {
         if (!live) return;
-        setLicence(r?.data?.results?.data || null);
+        const data = r?.data?.results?.data;
+        /* A 200 with no key is not success. This exact case looked like an
+           empty box and nothing else: a route declared after /:CenterID was
+           answering with a centre lookup, which is a perfectly valid response
+           carrying no licence. Say so rather than show a blank field. */
+        if (!data || !data.CenterApiKey) {
+          setError(
+            "The server answered without a licence key. If this persists, the API may be running a build that predates the developer-licence endpoint."
+          );
+          setLicence(null);
+          return;
+        }
+        setLicence(data);
       })
       .catch((e) => {
         if (!live) return;
@@ -86,7 +98,12 @@ function DevLicence() {
     setError("");
     try {
       const r = await Axios.post("/api/v1/centers/dev-licence/regenerate");
-      setLicence(r?.data?.results?.data || null);
+      const data = r?.data?.results?.data;
+      if (!data || !data.CenterApiKey) {
+        setError("The server did not return a new key.");
+        return;
+      }
+      setLicence(data);
       setRevealed(true);
     } catch (e) {
       setError(e?.response?.data?.errors?.message || "Could not regenerate the key.");
